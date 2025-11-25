@@ -1,6 +1,6 @@
 """
-Widget de carte de film pour l'application Netflux
-Affiche un film avec son image, titre, genres et boutons d'interaction
+Movie card widget for the Netflux application.
+Displays a movie with its image, title, genres, and interaction buttons.
 """
 from PyQt6.QtWidgets import QFrame, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
 from PyQt6.QtGui import QPixmap, QFontMetrics
@@ -10,55 +10,55 @@ import os
 
 class FilmCard(QFrame):
     """
-    Widget représentant une carte de film interactive
-    Style Netflix : format rectangulaire horizontal avec boutons like et play
+    Widget representing an interactive movie card.
+    Netflix style: horizontal rectangular format with like and play buttons.
     """
     
-    # Signal émis quand le statut like change (film_id, is_liked)
+    # Signal emitted when the like status changes (film_id, is_liked)
     like_changed = pyqtSignal(str, bool)
-    # Signal émis quand le bouton play est cliqué
+    # Signal emitted when the play button is clicked
     play_clicked = pyqtSignal(object)
     
     def __init__(self, film, user_manager=None, parent=None):
         """
-        Initialise une carte de film
+        Initialize a movie card.
         
         Args:
-            film: Instance de Film à afficher
-            user_manager: Gestionnaire d'utilisateurs (optionnel)
-            parent: Widget parent (optionnel)
+            film: Film instance to display
+            user_manager: User manager (optional)
+            parent: Parent widget (optional)
         """
         super().__init__(parent)
         self.film = film
         self.user_manager = user_manager
         
-        # Configuration du widget
+        # Widget configuration
         self.setMinimumSize(280, 160)
         self.setMaximumSize(280, 160)
         self.setObjectName("movieCard")
         self.setProperty("class", "movie-card")
         
-        # Créer l'interface
+        # Create the interface
         self.setup_ui()
         
-        # Connecter les signaux
+        # Connect signals
         self.connect_signals()
     
     def setup_ui(self):
-        """Configure l'interface de la carte"""
-        # Layout principal vertical : image en haut, infos en bas
+        """Configure the card interface."""
+        # Main vertical layout: image on top, info at bottom
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # Container pour l'image
+        # Container for the image
         self.create_image_container(main_layout)
         
-        # Container pour les infos en bas
+        # Container for the info at bottom
         self.create_info_container(main_layout)
     
     def create_image_container(self, parent_layout):
-        """Crée le container de l'image du film"""
+        """Create the container for the movie image."""
         image_container = QFrame()
         image_container.setObjectName("imageContainer")
         image_container.setMinimumSize(280, 105)
@@ -68,7 +68,7 @@ class FilmCard(QFrame):
         image_layout.setContentsMargins(0, 0, 0, 0)
         image_layout.setSpacing(0)
 
-        # Charger l'image
+        # Load the image
         if not os.path.exists(self.film.tiles):
             pixmap = QPixmap("./assets/image_not_found.jpeg")
         else:
@@ -87,7 +87,7 @@ class FilmCard(QFrame):
         parent_layout.addWidget(image_container)
     
     def create_info_container(self, parent_layout):
-        """Crée le container des informations et boutons"""
+        """Create the container for information and buttons."""
         info_container = QFrame()
         info_container.setObjectName("infoContainer")
         info_container.setMinimumHeight(55)
@@ -97,36 +97,36 @@ class FilmCard(QFrame):
         main_info_layout.setContentsMargins(8, 6, 8, 8)
         main_info_layout.setSpacing(8)
         
-        # Textes (titre + genre/durée)
+        # Text section (title + genre/duration)
         self.create_text_section(main_info_layout)
         
         main_info_layout.addStretch()
         
-        # Boutons (like + play)
+        # Buttons (like + play)
         self.create_action_buttons(main_info_layout)
         
         parent_layout.addWidget(info_container)
     
     def create_text_section(self, parent_layout):
-        """Crée la section texte (titre et métadonnées)"""
+        """Create the text section (title and metadata)."""
         text_layout = QVBoxLayout()
         text_layout.setContentsMargins(0, 0, 0, 0)
         text_layout.setSpacing(4)
 
-        # Titre avec ellipse
+        # Title with ellipsis
         title_label = QLabel(self.film.titre)
         title_label.setWordWrap(False)
         title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         title_label.setObjectName("movieTitle")
         title_label.setMaximumHeight(18)
         
-        # Appliquer l'ellipse
+        # Apply ellipsis
         metrics = QFontMetrics(title_label.font())
         elided_text = metrics.elidedText(self.film.titre, Qt.TextElideMode.ElideRight, 220)
         title_label.setText(elided_text)
         text_layout.addWidget(title_label)
 
-        # Genre et durée
+        # Genre and duration
         genre_text = ', '.join(self.film.genres[:2])
         if len(self.film.genres) > 2:
             genre_text += '...'
@@ -139,8 +139,8 @@ class FilmCard(QFrame):
         parent_layout.addLayout(text_layout)
     
     def create_action_buttons(self, parent_layout):
-        """Crée les boutons d'action (like et play)"""
-        # Bouton Like (cœur)
+        """Create the action buttons (like and play)."""
+        # Like button (heart)
         self.like_button = QPushButton("♡")
         self.like_button.setObjectName("likeButton")
         self.like_button.setProperty("film_id", self.film.system_name)
@@ -148,12 +148,12 @@ class FilmCard(QFrame):
         self.like_button.setMinimumSize(32, 28)
         self.like_button.setMaximumSize(32, 28)
         
-        # Mettre à jour l'état du bouton like
+        # Update the like button state
         self.update_like_button_state()
         
         parent_layout.addWidget(self.like_button, alignment=Qt.AlignmentFlag.AlignVCenter)
 
-        # Bouton Play
+        # Play button
         self.play_button = QPushButton("▶")
         self.play_button.setObjectName("playButtonMini")
         self.play_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -163,12 +163,12 @@ class FilmCard(QFrame):
         parent_layout.addWidget(self.play_button, alignment=Qt.AlignmentFlag.AlignVCenter)
     
     def connect_signals(self):
-        """Connecte les signaux des boutons"""
+        """Connect button signals."""
         self.like_button.clicked.connect(self.on_like_clicked)
         self.play_button.clicked.connect(self.on_play_clicked)
     
     def update_like_button_state(self):
-        """Met à jour l'apparence du bouton like selon l'état"""
+        """Update the like button appearance based on state."""
         if self.user_manager and self.user_manager.current_user:
             is_liked = self.user_manager.current_user.is_favorite(self.film.system_name)
             self.like_button.setText("♥" if is_liked else "♡")
@@ -177,54 +177,54 @@ class FilmCard(QFrame):
             self.like_button.setText("♡")
             self.like_button.setProperty("liked", False)
         
-        # Forcer le rafraîchissement du style si disponible, sinon demander un repaint
+        # Force style refresh if available, otherwise request repaint
         style = self.like_button.style()
         if style is not None:
             style.unpolish(self.like_button)
             style.polish(self.like_button)
         else:
-            # fallback: force un redessin du widget
+            # Fallback: force a widget repaint
             self.like_button.update()
     
     def on_like_clicked(self):
-        """Gestionnaire du clic sur le bouton like"""
+        """Handler for the like button click."""
         if not self.user_manager or not self.user_manager.current_user:
-            print("⚠️  Veuillez vous connecter pour liker des films")
+            print("⚠️  Please log in to like movies")
             return
         
         user = self.user_manager.current_user
         
-        # Toggle le statut de favori
+        # Toggle favorite status
         if user.is_favorite(self.film.system_name):
             user.remove_favorite(self.film.system_name)
             is_now_liked = False
-            print(f"💔 {self.film.titre} retiré des favoris de {user.username}")
+            print(f"💔 {self.film.titre} removed from {user.username}'s favorites")
         else:
             user.add_favorite(self.film.system_name)
             is_now_liked = True
-            print(f"❤️  {self.film.titre} ajouté aux favoris de {user.username}")
+            print(f"❤️  {self.film.titre} added to {user.username}'s favorites")
         
-        # Sauvegarder les changements
+        # Save changes
         self.user_manager.save_users()
         
-        # Mettre à jour cette carte
+        # Update this card
         self.update_like_button_state()
         
-        # Émettre le signal pour synchroniser les autres cartes
+        # Emit signal to synchronize other cards
         self.like_changed.emit(self.film.system_name, is_now_liked)
      
     def on_play_clicked(self):
-        """Gestionnaire du clic sur le bouton play"""
-        print(f"▶️  Lecture de : {self.film.titre}")
+        """Handler for the play button click."""
+        print(f"▶️  Playing: {self.film.titre}")
         self.play_clicked.emit(self.film)
     
     def sync_like_state(self, film_id, is_liked):
         """
-        Synchronise l'état like avec d'autres cartes
+        Synchronize like state with other cards.
         
         Args:
-            film_id: Identifiant du film
-            is_liked: Nouvel état du like
+            film_id: Movie identifier
+            is_liked: New like state
         """
         if self.film.system_name == film_id:
             self.update_like_button_state()
@@ -232,25 +232,25 @@ class FilmCard(QFrame):
 
 def createFilmCard(film, user_manager=None):
     """
-    Fonction legacy pour compatibilité avec le code existant
-    Crée et retourne une instance de FilmCard
+    Legacy function for compatibility with existing code.
+    Creates and returns a FilmCard instance.
     
     Args:
-        film: Instance de Film
-        user_manager: Gestionnaire d'utilisateurs (optionnel)
+        film: Film instance
+        user_manager: User manager (optional)
     
     Returns:
-        FilmCard: Instance de la carte de film
+        FilmCard: Movie card instance
     """
     return FilmCard(film, user_manager)
 
 
 def deleteFilmCard(card):
     """
-    Fonction legacy pour supprimer une carte
+    Legacy function to delete a card.
     
     Args:
-        card: Instance de FilmCard à supprimer
+        card: FilmCard instance to delete
     """
     card.setParent(None)
     card.deleteLater()

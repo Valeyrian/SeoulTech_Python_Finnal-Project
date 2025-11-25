@@ -1,79 +1,79 @@
 """
-Modèle de données Film pour l'application Netflux
+Film data model for the Netflux application.
 """
 
 
 class Film:
     """
-    Représente un film avec ses métadonnées
+    Represents a movie with its metadata.
     
     Attributes:
-        titre (str): Titre du film
-        minute (int): Durée en minutes
-        genres (list[str]): Liste des genres du film
-        system_name (str): Identifiant système unique
-        tiles (str): Chemin vers l'image miniature
-        video (str): Chemin vers le fichier vidéo
+        titre (str): Movie title
+        minute (int): Duration in minutes
+        genres (list[str]): List of movie genres
+        system_name (str): Unique system identifier
+        tiles (str): Path to the thumbnail image
+        video (str): Path to the video file
     """
     
     def __init__(self, titre, minute, genres, system_name):
         """
-        Initialise un film
+        Initialize a movie.
         
         Args:
-            titre (str): Titre du film
-            minute (int|str): Durée en minutes
-            genres (list[str]): Liste des genres
-            system_name (str): Identifiant système unique
+            titre (str): Movie title
+            minute (int|str): Duration in minutes
+            genres (list[str]): List of genres
+            system_name (str): Unique system identifier
         """
         self.titre = titre
         self.minute = int(minute)
-        self.genres = genres  # liste de chaînes
+        self.genres = genres  # List of strings
         self.system_name = system_name
         self.tiles = f"./data/movies_tiles/{system_name}.jpg"
         self.video = f"./data/movies/{system_name}.mp4"
     
     def __repr__(self):
-        """Représentation textuelle du film"""
+        """Text representation of the movie."""
         return f"<Film titre='{self.titre}' ({self.minute} min)>"
     
     def __str__(self):
-        """Chaîne de caractères pour l'affichage"""
+        """String representation for display."""
         genres_str = ", ".join(self.genres)
         return f"{self.titre} ({self.minute}m) - {genres_str}"
     
     def __eq__(self, other):
-        """Égalité basée sur le system_name"""
+        """Equality based on system_name."""
         if not isinstance(other, Film):
             return False
         return self.system_name == other.system_name
     
     def __hash__(self):
-        """Hash basé sur le system_name pour utilisation dans sets/dicts"""
+        """Hash based on system_name for use in sets/dicts."""
         return hash(self.system_name)
     
     def has_genre(self, genre):
         """
-        Vérifie si le film appartient à un genre donné
+        Check if the movie belongs to a given genre.
         
         Args:
-            genre (str): Genre à vérifier
+            genre (str): Genre to check
             
         Returns:
-            bool: True si le film a ce genre
+            bool: True if the movie has this genre
         """
         return genre in self.genres
     
     def matches_keywords(self, keywords):
         """
-        Vérifie si le titre correspond aux mots-clés
+        Check if the title matches the keywords.
         
         Args:
-            keywords (str): Mots-clés séparés par des espaces
+            keywords (str): Keywords separated by spaces
             
         Returns:
-            bool: True si au moins un mot-clé est trouvé
+            bool: True if at least one keyword is found
         """
-        mots = keywords.lower().split()
-        titre = self.titre.lower()
-        return any(mot in titre for mot in mots)
+        words = keywords.lower().split()
+        title = self.titre.lower()
+        return any(word in title for word in words)

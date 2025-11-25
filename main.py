@@ -17,9 +17,11 @@ from player.player import player
 
 class MainApp(QMainWindow, Ui_MainWindow):
     """
-    Vue principale de l'application Netflux
-    Responsabilités : affichage UI, interactions utilisateur
-    Ne contient PAS de logique métier (délégation au controller)
+    Main view of the Netflux application.
+    
+    Responsibilities:
+        - UI display and user interactions
+        - Does NOT contain business logic (delegated to the controller)
     """
     
     def __init__(self, catalogue):
@@ -29,75 +31,75 @@ class MainApp(QMainWindow, Ui_MainWindow):
 
         if (not os.path.exists("./assets/logo.png")):
             pixmap = QPixmap("./assets/file_not_found.jpeg")
-            raise FileNotFoundError("Le fichier './assets/logo.png' est manquant. Veuillez vous assurer qu'il est présent.")
+            raise FileNotFoundError("The file './assets/logo.png' is missing. Please make sure it exists.")
         else :
             pixmap = QPixmap("./assets/logo.png")
 
         self.logo.setPixmap(pixmap.scaled(140, 40))
 
         
-        # Initialiser le gestionnaire d'utilisateurs
+        # Initialize the user manager
         self.user_manager = UserManager()
         self.user_manager.load_users()
         
-        # Stocker le catalogue pour accéder aux genres
+        # Store the catalogue to access genres
         self.catalogue = catalogue
         
-        # Initialiser le contrôleur (couche métier)
+        # Initialize the controller (business logic layer)
         self.controller = MovieController(catalogue)
         
         self.current_view = "acceuil"
         self.current_view_mode = "genre"
        
-        self.show_movie_list_by_genre()  # Vue par genre avec scroll horizontal
+        self.show_movie_list_by_genre()  # Genre view with horizontal scroll
        
         
-        # Liste pour stocker toutes les cartes affichées (pour la synchronisation)
+        # List to store all displayed cards (for synchronization)
         self.displayed_cards = []
         
-        # Connecter les événements UI
+        # Connect UI events
         self.searchButton.clicked.connect(self.on_search_clicked)
         self.searchBar.returnPressed.connect(self.on_search_clicked)
         
-        # Bouton Accueil : afficher tous les films par genre
+        # Home button: display all movies by genre
         self.acceuilButton.clicked.connect(self.on_home_clicked)
 
-        # Bouton Recommandation
+        # Recommendation button
         self.recomandationButton.clicked.connect(self.on_recomendation_clicked)
         
-        # Menu déroulant pour le bouton Account
+        # Dropdown menu for the Account button
         self.setup_account_menu()
         
     
-    # ========== MÉTHODES UI (Affichage uniquement) ==========
+    # ========== UI METHODS (Display only) ==========
     
     def setup_account_menu(self):
         """
-        Configure le menu déroulant pour le bouton Account
-        Affiche Login ou Logout selon l'état de connexion
+        Configure the dropdown menu for the Account button.
+        Displays Login or Logout depending on the connection status.
         """
-        # Créer le menu
+        # Create the menu
         account_menu = QMenu(self)
         account_menu.setObjectName("accountMenu")
         
-        # Vérifier si un utilisateur est connecté
+        # Check if a user is logged in
         if self.user_manager.current_user:
-            # Utilisateur connecté : afficher le profil et logout
+            # User logged in: display profile and logout options
             user = self.user_manager.current_user
             
-            # Afficher le nom de l'utilisateur (cliquable pour voir le profil)
+            # Display the username (clickable to view profile)
             profile_action = QAction(f"👤 {user.username}", self)
             profile_action.setEnabled(False)
             account_menu.addAction(profile_action)
             
             account_menu.addSeparator()
             
-            # Option Favoris
+            # Favorites option
             favorites_action = QAction("My likes", self)
             favorites_action.triggered.connect(self.on_favorites_clicked)
             account_menu.addAction(favorites_action)
             
-            # # Option Watchlist
+            # # Watchlist option
             # watchlist_action = QAction("My watch list", self)
             # watchlist_action.triggered.connect(self.on_watchlist_clicked)
             # account_menu.addAction(watchlist_action)
@@ -108,83 +110,83 @@ class MainApp(QMainWindow, Ui_MainWindow):
             
             account_menu.addSeparator()
             
-            # Bouton Logout
+            # Logout button
             logout_action = QAction("Logout", self)
             logout_action.triggered.connect(self.on_logout_clicked)
             account_menu.addAction(logout_action)
         else:
-            # Aucun utilisateur connecté : afficher login
+            # No user logged in: display login
             login_action = QAction("Login", self)
             login_action.triggered.connect(self.on_login_clicked)
             account_menu.addAction(login_action)
         
-        # Attacher le menu au bouton
+        # Attach the menu to the button
         self.accountButton.setMenu(account_menu)
     
     def _calculate_columns(self):
         """
-        Calcule dynamiquement le nombre de colonnes en fonction de la largeur disponible
+        Dynamically calculates the number of columns based on available width.
         """
-        card_width = 300  # Largeur approximative d'une carte (280px + marges)
-        min_columns = 2   # Nombre minimum de colonnes
-        max_columns = 5   # Nombre maximum de colonnes (cartes plus larges)
-        default_columns = 3  # Valeur par défaut au démarrage
+        card_width = 300  # Approximate width of a card (280px + margins)
+        min_columns = 2   # Minimum number of columns
+        max_columns = 5   # Maximum number of columns (wider cards)
+        default_columns = 3  # Default value at startup
         
-        # Obtenir la largeur disponible dans la zone de contenu
-        available_width = self.scrollArea.width() - 40  # Marges
+        # Get the available width in the content area
+        available_width = self.scrollArea.width() - 40  # Account for margins
         
-        # Si la fenêtre n'est pas encore affichée (largeur trop petite), utiliser la valeur par défaut
-        if available_width < 400:  # Largeur minimale raisonnable
+        # If the window is not yet displayed (width too small), use default value
+        if available_width < 400:  # Reasonable minimum width
             return default_columns
         
-        # Calculer le nombre de colonnes optimal
+        # Calculate the optimal number of columns
         columns = max(min_columns, min(max_columns, available_width // card_width))
         
         return columns
     
     def _connect_card_signals(self, card):
         """
-        Connecte les signaux d'une carte de film pour la synchronisation
+        Connect the signals of a movie card for synchronization.
         
         Args:
-            card: Instance de FilmCard
+            card: FilmCard instance
         """
-        # Connecter le signal de changement de like
+        # Connect the like status change signal
         card.like_changed.connect(self._sync_all_cards_like_state)
         #card.play_clicked.connect(self.startMediaPlayer)
     
     def _sync_all_cards_like_state(self, film_id, is_liked):
         """
-        Synchronise l'état like de toutes les cartes affichées pour un film donné
+        Synchronize the like state of all displayed cards for a given movie.
         
         Args:
-            film_id: Identifiant du film
-            is_liked: Nouvel état du like
+            film_id: Movie identifier
+            is_liked: New like state
         """
 
-        # Parcourir toutes les cartes affichées
+        # Iterate through all displayed cards
         for card in self.displayed_cards:
             if hasattr(card, 'sync_like_state'):
                 card.sync_like_state(film_id, is_liked)
 
         if self.current_view_mode == "favorites":
-            # Si on est dans les favoris, rafraîchir l'affichage pour retirer les films non likés
+            # If in favorites view, refresh display to remove unliked movies
             QTimer.singleShot(100, self._reload_favorites_view)
     
     def resizeEvent(self, event):
         """
-        Gestionnaire d'événement pour redimensionner la fenêtre
-        Réorganise les cartes quand la fenêtre change de taille
+        Event handler for window resize.
+        Reorganizes cards when the window size changes.
         """
         super().resizeEvent(event)
         
-        # Réafficher les films avec le nouveau nombre de colonnes
+        # Redisplay movies with the new column count
         if hasattr(self, 'controller') and self.gridLayout.count() > 0:
-            # Vérifier si on est en mode grille ou genre
+            # Check if we're in grid mode or genre mode
             first_item = self.gridLayout.itemAt(0)
             if first_item and first_item.widget():
                 if isinstance(first_item.widget(), GenreRow):
-                    # Mode genre : réorganiser les GenreRow avec le nouveau span
+                    # Genre mode: reorganize GenreRows with new span
                     current_query = self.searchBar.text().strip()
                     if current_query:
                         movie_list = self.controller.search_movies(current_query)
@@ -192,7 +194,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
                         movie_list = self.controller.get_all_movies()
                     self.show_movie_list_by_genre(movie_list)
                 else:
-                    # Mode grille : réorganiser les cartes
+                    # Grid mode: reorganize cards
                     current_query = self.searchBar.text().strip()
                     if current_query:
                         movie_list = self.controller.search_movies(current_query)
@@ -202,36 +204,36 @@ class MainApp(QMainWindow, Ui_MainWindow):
     
     def show_movie_list(self, movie_list=None):
         """
-        Met à jour l'affichage des cartes de films
+        Update the display of movie cards.
         
         Args:
-            movie_list (list, optional): Liste de films à afficher.
-                                        Si None, demande au contrôleur les films à afficher
+            movie_list (list, optional): List of movies to display.
+                                        If None, requests movies from the controller.
         """
-        # Si aucune liste fournie, demander au contrôleur
+        # If no list provided, request from controller
         if movie_list is None:
             movie_list = self.controller.get_all_movies()
         
-        #use le layout dédié aux films (défini dans main_window.py)
+        # Use the layout dedicated to movies (defined in main_window.py)
         layout = self.gridLayout
         
-        # Vider proprement les anciennes cartes
+        # Properly clear old cards
         self._clear_layout(layout)
         
-        # Réinitialiser la liste des cartes affichées
+        # Reset the list of displayed cards
         self.displayed_cards = []
         
-        # Ajouter les nouvelles cartes en grille
+        # Add new cards in grid layout
         row, col = 0, 0
-        max_col = self._calculate_columns()  # Calcul dynamique du nombre de colonnes
+        max_col = self._calculate_columns()  # Dynamic column count calculation
         
         for film in movie_list:
             card_widget = createFilmCard(film, self.user_manager)
             
-            # Connecter les signaux de la carte
+            # Connect card signals
             self._connect_card_signals(card_widget)
             
-            # Enregistrer la carte pour la synchronisation
+            # Register the card for synchronization
             self.displayed_cards.append(card_widget)
             
             layout.addWidget(card_widget, row, col)
@@ -240,7 +242,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
                 col = 0
                 row += 1
         
-        # Forcer la mise à jour de la zone de scroll
+        # Force scroll area update
         try:
             self.scrollAreaWidgetContents.adjustSize()
         except Exception:
@@ -248,40 +250,40 @@ class MainApp(QMainWindow, Ui_MainWindow):
     
     def show_movie_list_by_genre(self,movie_list=None):
         """
-        Affiche les films organisés par genre avec scroll horizontal
-        Style Netflix avec une ligne par genre
+        Display movies organized by genre with horizontal scrolling.
+        Netflix-style layout with one row per genre.
         """
-        # Récupérer les films groupés par genre depuis le contrôleur
+        # Get movies grouped by genre from the controller
         if movie_list is None:
             movie_list = self.controller.get_all_movies()
         grouped_movies = self.controller.get_movies_grouped_by_genre(movie_list)
         
-        # Vider le layout actuel
+        # Clear the current layout
         layout = self.gridLayout
         self._clear_layout(layout)
         
-        # Réinitialiser la liste des cartes affichées
+        # Reset the list of displayed cards
         self.displayed_cards = []
         
-        # Calculer le nombre de colonnes pour le span
+        # Calculate the number of columns for span
         max_col = self._calculate_columns()
         
-        # Créer un container vertical pour toutes les rangées de genre
+        # Create a vertical container for all genre rows
         row = 0
         for genre, films in grouped_movies.items():
-            if films:  # Seulement si le genre a des films
-                # Créer une rangée de genre avec scroll horizontal
+            if films:  # Only if the genre has movies
+                # Create a genre row with horizontal scroll
                 genre_row = GenreRow(genre, films, self.user_manager)
-                layout.addWidget(genre_row, row, 0, 1, max_col)  # Prend toute la largeur (dynamique)
+                layout.addWidget(genre_row, row, 0, 1, max_col)  # Takes full width (dynamic)
                 
-                # Enregistrer toutes les cartes de cette rangée et connecter leurs signaux
+                # Register all cards from this row and connect their signals
                 for card_widget in genre_row.get_cards():
                     self._connect_card_signals(card_widget)
                     self.displayed_cards.append(card_widget)
                 
                 row += 1
         
-        # Forcer la mise à jour
+        # Force update
         try:
             self.scrollAreaWidgetContents.adjustSize()
         except Exception:
@@ -289,10 +291,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
 
     def show_movies(self,movie_list):
         """
-        Affiche une liste de films donnée selon le mode d'affichage actuel
+        Display a given list of movies according to the current view mode.
         
         Args:
-            movie_list (list): Liste de films à afficher
+            movie_list (list): List of movies to display
         """
         self._clear_layout(self.gridLayout)
 
@@ -303,10 +305,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
             
     def _clear_layout(self, layout):
         """
-        Helper privé pour vider proprement un layout
+        Private helper to properly clear a layout.
         
         Args:
-            layout: QLayout à vider
+            layout: QLayout to clear
         """
         while layout.count():
             item = layout.takeAt(0)
@@ -317,7 +319,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
                 widget.setParent(None)
                 widget.deleteLater()
             else:
-                # Gérer les sous-layouts si nécessaire
+                # Handle sub-layouts if necessary
                 sub_layout = item.layout()
                 if sub_layout:
                     self._clear_layout(sub_layout)
@@ -327,114 +329,114 @@ class MainApp(QMainWindow, Ui_MainWindow):
         
         
    
-    # ========== GESTIONNAIRES D'ÉVÉNEMENTS (Event handlers) ==========
+    # ========== EVENT HANDLERS ==========
     
     def on_home_clicked(self):
         """
-        Gestionnaire du clic sur le bouton Accueil
-        Réinitialise la recherche et affiche tous les films
+        Handler for the Home button click.
+        Resets the search and displays all movies.
         """
-        # Vider la barre de recherche
+        # Clear the search bar
         self.searchBar.clear()
         
-        # Demander au contrôleur tous les films
+        # Request all movies from the controller
         all_movies = self.controller.get_all_movies()
         
-        # Mettre à jour l'affichage
+        # Update the display
         self.current_view = "acceuil"
         self.current_view_mode = "genre"
         self.show_movies(all_movies)
         
     def on_recomendation_clicked(self):
         """ 
-        Gestionnaire du clic sur le bouton recommandation
-        Délègue la recommandation au contrôleur
+        Handler for the Recommendation button click.
+        Delegates recommendation logic to the controller.
         """
         if not self.user_manager.current_user:
-            print("Veuillez vous connecter pour voir des recommandations")
+            print("Please log in to see recommendations")
             return
         
         user = self.user_manager.current_user
         
-        # Demander au contrôleur les recommandations pour l'utilisateur
+        # Request recommendations for the user from the controller
         recommendations = self.controller.get_recommanded_movies(user)
         
-        # Mettre à jour l'affichage (logique UI)s
+        # Update the display (UI logic)
         self.current_view = "recommandation"
         self.current_view_mode = "genre"
         self.show_movies(recommendations)
     
     def on_search_clicked(self):
         """
-        Gestionnaire du clic sur le bouton recherche (ou Enter dans la barre)
-        Délègue la recherche au contrôleur
+        Handler for the Search button click (or Enter key in the search bar).
+        Delegates the search to the controller.
         """
         query = self.searchBar.text().strip()
         
-        # Demander au contrôleur de faire la recherche (logique métier)
+        # Ask the controller to perform the search (business logic)
         results = self.controller.search_movies(query)
         
-        # Mettre à jour l'affichage (logique UI)
+        # Update the display (UI logic)
         self.current_view = "search"
         self.current_view_mode = "grid"
         self.show_movies(results)
 
 
 
-    # ========== GESTIONNAIRES DU MENU ACCOUNT ==========
+    # ========== ACCOUNT MENU HANDLERS ==========
     
     def on_login_clicked(self):
         """
-        Gestionnaire pour le login
-        Affiche le dialogue de connexion
+        Handler for login.
+        Displays the login dialog.
         """
         user = show_login_dialog(self.user_manager, self)
         
         if user:
-            print(f"Connecté en tant que {user.username}")
-            # Rafraîchir le menu pour afficher logout
+            print(f"Logged in as {user.username}")
+            # Refresh the menu to display logout
             self.setup_account_menu()
     
     def on_genre_preferences_clicked(self):
         """
-        Gestionnaire pour afficher le dialogue de préférences de genres
+        Handler to display the genre preferences dialog.
         """
         if not self.user_manager.current_user:
-            print("Veuillez vous connecter pour gérer vos préférences")
+            print("Please log in to manage your preferences")
             return
         
-        # Récupérer la liste de tous les genres du catalogue
+        # Get the list of all genres from the catalogue
         all_genres = self.catalogue.getAllTheGenres()
         
-        # Afficher le dialogue
+        # Display the dialog
         show_genre_preferences_dialog(self.user_manager, all_genres, self)
     
     def on_logout_clicked(self):
         """
-        Gestionnaire pour le logout
+        Handler for logout.
         """
         if self.user_manager.current_user:
-            # Demander confirmation
+            # Ask for confirmation
             if confirm_logout(self.user_manager.current_user.username, self):
-                print(f"Déconnexion de {self.user_manager.current_user.username}")
+                print(f"Logging out {self.user_manager.current_user.username}")
                 self.user_manager.current_user = None
                 self.user_manager.save_users()
                 
-                # Rafraîchir le menu pour afficher login
+                # Refresh the menu to display login
                 self.setup_account_menu()
         else:
-            print("Aucun utilisateur connecté")
+            print("No user logged in")
     
     def on_favorites_clicked(self):
         """
-        Gestionnaire pour afficher les favoris
+        Handler to display favorites.
         """
         user = self.user_manager.current_user
         if not user:
-            print("Veuillez vous connecter pour voir vos favoris")
+            print("Please log in to see your favorites")
             return
 
-        print(f"Favoris de {user.username}: {user.favorites}")
+        print(f"Favorites of {user.username}: {user.favorites}")
         self.searchBar.clear()
 
         favorites = self.controller.get_favorite_movies(user)
@@ -445,33 +447,33 @@ class MainApp(QMainWindow, Ui_MainWindow):
 
     def _reload_favorites_view(self):
             """
-            Recharge complètement la vue des favoris (appelé en différé)
+            Fully reload the favorites view (called with delay).
             """
             user = self.user_manager.current_user
             if not user:
                 return
 
-            print(f"[RELOAD] Rechargement de la vue favoris pour {user.username}")
+            print(f"[RELOAD] Reloading favorites view for {user.username}")
         
             favorites = self.controller.get_favorite_movies(user)
 
             if not favorites:
-                print("Aucun favori à afficher")
+                print("No favorites to display")
                 self._clear_layout(self.gridLayout)
             else:
                 self.show_movies(favorites)
 
     def on_watchlist_clicked(self):
             """
-            Gestionnaire pour afficher la watchlist
+            Handler to display the watchlist.
             """
             if not self.user_manager.current_user:
-                print("⚠️  Veuillez vous connecter pour voir votre liste")
+                print("⚠️  Please log in to see your list")
                 return
             
             user = self.user_manager.current_user
-            print(f"📋 Liste de {user.username}: {user.watchlist}")
-            # TODO: Filtrer et afficher les films de la watchlist
+            print(f"📋 List of {user.username}: {user.watchlist}")
+            # TODO: Filter and display movies from the watchlist
 
         
             
@@ -483,15 +485,15 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     
-    # Charger la feuille de style Netflux
+    # Load the Netflux stylesheet
     style_path = "./assets/styles.qss"
     if os.path.exists(style_path):
         with open(style_path, "r", encoding="utf-8") as f:
             app.setStyleSheet(f.read())
-        print(" Feuille de style Netflux chargée")
+        print(" Netflux stylesheet loaded")
     else:
-        print(f"  Feuille de style non trouvée : {style_path}")
-        raise FileNotFoundError(f"Le fichier de style '{style_path}' est manquant. Veuillez vous assurer qu'il est présent.")
+        print(f"  Stylesheet not found: {style_path}")
+        raise FileNotFoundError(f"The style file '{style_path}' is missing. Please make sure it exists.")
     
     window = MainApp(katalogue)
     window.show()

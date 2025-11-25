@@ -1,6 +1,6 @@
 """
-Dialogues et interfaces utilisateur pour la gestion des comptes
-Sépare la logique UI complexe du fichier main.py
+Dialogs and user interfaces for account management.
+Separates complex UI logic from the main.py file.
 """
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
                             QPushButton, QLineEdit, QMessageBox, QFormLayout, 
@@ -12,27 +12,27 @@ from user_manager.user import User, UserManager
 
 class LoginDialog(QDialog):
     """
-    Dialogue de connexion/création de compte
+    Login/account creation dialog.
     """
     
     def __init__(self, user_manager: UserManager, parent=None):
         super().__init__(parent)
         self.user_manager = user_manager
-        self.logged_user = None  # Utilisateur connecté après le dialogue
+        self.logged_user = None  # User logged in after the dialog
         self.setup_ui()
     
     def setup_ui(self):
-        """Configure l'interface du dialogue"""
+        """Configure the dialog interface."""
         self.setWindowTitle("Netflux - Login")
         self.setMinimumSize(400, 300)
         self.setModal(True)
         
-        # Layout principal
+        # Main layout
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(20)
         main_layout.setContentsMargins(30, 30, 30, 30)
         
-        # Titre
+        # Title
         title = QLabel("Welcome on Netflux")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title_font = QFont()
@@ -41,11 +41,11 @@ class LoginDialog(QDialog):
         title.setFont(title_font)
         main_layout.addWidget(title)
         
-        # Formulaire
+        # Form
         form_layout = QFormLayout()
         form_layout.setSpacing(15)
         
-        # Champ username
+        # Username field
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Enter your username")
         self.username_input.setMinimumHeight(35)
@@ -54,8 +54,8 @@ class LoginDialog(QDialog):
         
         main_layout.addLayout(form_layout)
         
-        # Message d'info
-        info_label = QLabel("Si le compte existe, vous serez connecté.\nSinon, un nouveau compte sera créé.")
+        # Info message
+        info_label = QLabel("If the account exists, you will be logged in.\nOtherwise, a new account will be created.")
         info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         info_label.setObjectName("infoLabel")
         main_layout.addWidget(info_label)
@@ -63,7 +63,7 @@ class LoginDialog(QDialog):
         # Spacer
         main_layout.addStretch()
         
-        # Boutons
+        # Buttons
         button_layout = QHBoxLayout()
         button_layout.setSpacing(10)
         
@@ -81,28 +81,28 @@ class LoginDialog(QDialog):
         
         main_layout.addLayout(button_layout)
         
-        # Appliquer l'ObjectName pour utiliser le style global
+        # Apply ObjectName to use global style
         self.setObjectName("loginDialog")
         login_btn.setObjectName("primaryButton")
     
     def on_login(self):
-        """Gère la connexion ou création de compte"""
+        """Handle login or account creation."""
         username = self.username_input.text().strip()
         
         if not username:
-            QMessageBox.warning(self, "Erreur", "Please enter a username")
+            QMessageBox.warning(self, "Error", "Please enter a username")
             return
         
-        # Chercher si l'utilisateur existe
+        # Check if user exists
         existing_user = self.user_manager.get_user_by_username(username)
         
         if existing_user:
-            # Connexion à un compte existant
+            # Log in to existing account
             self.user_manager.set_current_user(existing_user)
             self.logged_user = existing_user
             
         else:
-            # Créer un nouveau compte
+            # Create a new account
             new_user = self.user_manager.create_user(username)
             self.logged_user = new_user
             QMessageBox.information(self, "Registration successful", 
@@ -112,14 +112,14 @@ class LoginDialog(QDialog):
 
 def show_login_dialog(user_manager: UserManager, parent=None) :
     """
-    Affiche le dialogue de connexion et retourne l'utilisateur connecté
+    Display the login dialog and return the logged-in user.
     
     Args:
-        user_manager: Gestionnaire d'utilisateurs
-        parent: Widget parent
+        user_manager: User manager
+        parent: Parent widget
         
     Returns:
-        User si connexion réussie, None sinon
+        User if login successful, None otherwise
     """
     dialog = LoginDialog(user_manager, parent)
     result = dialog.exec()
@@ -131,19 +131,19 @@ def show_login_dialog(user_manager: UserManager, parent=None) :
 
 def confirm_logout(username: str, parent=None) -> bool:
     """
-    Demande confirmation avant déconnexion
+    Ask for confirmation before logout.
     
     Args:
-        username: Nom de l'utilisateur
-        parent: Widget parent
+        username: User's name
+        parent: Parent widget
         
     Returns:
-        True si l'utilisateur confirme, False sinon
+        True if user confirms, False otherwise
     """
     reply = QMessageBox.question(
         parent,
-        "Déconnexion",
-        f"Voulez-vous vraiment vous déconnecter ({username}) ?",
+        "Logout",
+        f"Do you really want to log out ({username})?",
         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         QMessageBox.StandardButton.No
     )
@@ -154,13 +154,13 @@ def confirm_logout(username: str, parent=None) -> bool:
 
 class GenrePreferencesDialog(QDialog):
     """
-    Dialogue pour gérer les préférences de genres de l'utilisateur
+    Dialog for managing the user's genre preferences.
     """
     def __init__(self, user_manager: UserManager, genre_list=None, parent=None):
         super().__init__(parent)
         self.user_manager = user_manager
         self.genre_list = genre_list if genre_list else []
-        self.checkboxes = {}  # Dictionnaire pour stocker les checkboxes {genre: checkbox}
+        self.checkboxes = {}  # Dictionary to store checkboxes {genre: checkbox}
         
         if user_manager.current_user:
             self.user = user_manager.current_user
@@ -170,17 +170,17 @@ class GenrePreferencesDialog(QDialog):
         self.setup_ui()
     
     def setup_ui(self):
-        """Configure l'interface du dialogue"""
+        """Configure the dialog interface."""
         self.setWindowTitle("Netflux - Genre Preferences")
         self.setMinimumSize(500, 600)
         self.setModal(True)
         
-        # Layout principal
+        # Main layout
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(20)
         main_layout.setContentsMargins(30, 30, 30, 30)
         
-        # Titre
+        # Title
         title = QLabel("Select Your Favorite Genres")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title_font = QFont()
@@ -189,30 +189,30 @@ class GenrePreferencesDialog(QDialog):
         title.setFont(title_font)
         main_layout.addWidget(title)
         
-        # Sous-titre avec nom d'utilisateur
+        # Subtitle with username
         if self.user:
             subtitle = QLabel(f"Preferences for {self.user.username}")
             subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
             subtitle.setObjectName("infoLabel")
             main_layout.addWidget(subtitle)
         
-        # Zone scrollable pour les genres
+        # Scrollable area for genres
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setMinimumHeight(350)
         
-        # Widget conteneur pour les checkboxes
+        # Container widget for checkboxes
         genres_container = QWidget()
         genres_layout = QGridLayout(genres_container)
         genres_layout.setSpacing(15)
         
-        # Créer une checkbox pour chaque genre (2 colonnes)
+        # Create a checkbox for each genre (2 columns)
         row, col = 0, 0
         for genre in self.genre_list:
             checkbox = QCheckBox(genre)
             checkbox.setMinimumHeight(30)
             
-            # Cocher si le genre est déjà dans les préférences de l'utilisateur
+            # Check if the genre is already in user preferences
             if self.user and genre in self.user.likedGenre:
                 checkbox.setChecked(True)
             
@@ -220,7 +220,7 @@ class GenrePreferencesDialog(QDialog):
             genres_layout.addWidget(checkbox, row, col)
             
             col += 1
-            if col >= 2:  # 2 colonnes
+            if col >= 2:  # 2 columns
                 col = 0
                 row += 1
         
@@ -230,7 +230,7 @@ class GenrePreferencesDialog(QDialog):
         # Spacer
         main_layout.addStretch()
         
-        # Boutons
+        # Buttons
         button_layout = QHBoxLayout()
         button_layout.setSpacing(10)
         
@@ -248,25 +248,25 @@ class GenrePreferencesDialog(QDialog):
         
         main_layout.addLayout(button_layout)
         
-        # Appliquer l'ObjectName pour le style
+        # Apply ObjectName for styling
         self.setObjectName("loginDialog")
     
     def save_preferences(self):
-        """Sauvegarde les préférences de genres"""
+        """Save genre preferences."""
         if not self.user:
             QMessageBox.warning(self, "Error", "No user logged in")
             return
         
-        # Récupérer les genres cochés
+        # Get selected genres
         selected_genres = []
         for genre, checkbox in self.checkboxes.items():
             if checkbox.isChecked():
                 selected_genres.append(genre)
         
-        # Sauvegarder dans l'utilisateur
+        # Save in user
         self.user.likedGenre = selected_genres
         
-        # Sauvegarder dans le fichier
+        # Save to file
         self.user_manager.save_users()
         
         QMessageBox.information(self, "Success", 
@@ -276,15 +276,15 @@ class GenrePreferencesDialog(QDialog):
 
 def show_genre_preferences_dialog(user_manager: UserManager, genre_list, parent=None):
     """
-    Affiche le dialogue de préférences de genres
+    Display the genre preferences dialog.
     
     Args:
-        user_manager: Gestionnaire d'utilisateurs
-        genre_list: Liste des genres disponibles
-        parent: Widget parent
+        user_manager: User manager
+        genre_list: List of available genres
+        parent: Parent widget
         
     Returns:
-        True si sauvegarde réussie, False sinon
+        True if save successful, False otherwise
     """
     dialog = GenrePreferencesDialog(user_manager, genre_list, parent)
     result = dialog.exec()

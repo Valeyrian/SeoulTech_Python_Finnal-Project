@@ -1,6 +1,6 @@
 """
-Gestion des utilisateurs de l'application Netflux
-Sauvegarde et chargement depuis un fichier JSON
+User management for the Netflux application.
+Saving and loading from a JSON file.
 """
 import json
 import os
@@ -9,43 +9,43 @@ from typing import List, Dict, Optional
 
 class User:
     """
-    Classe représentant un utilisateur de l'application
+    Class representing an application user.
     """
     
     def __init__(self, username: str, email: str = "", user_id: Optional[int] = None):
         """
-        Initialise un utilisateur
+        Initialize a user.
         
         Args:
-            username: Nom d'utilisateur
-            email: Email de l'utilisateur
-            user_id: ID unique de l'utilisateur (généré automatiquement si None)
+            username: Username
+            email: User's email
+            user_id: Unique user ID (auto-generated if None)
         """
         self.user_id = user_id if user_id is not None else self._generate_id()
         self.username = username
         self.email = email
-        self.favorites: List[str] = []  # Liste des codes films favoris
-        self.watchlist: List[str] = []  # Liste des codes films à regarder
-        self.watched: List[str] = []    # Liste des codes films déjà vus
+        self.favorites: List[str] = []  # List of favorite movie codes
+        self.watchlist: List[str] = []  # List of movies to watch
+        self.watched: List[str] = []    # List of already watched movies
         self.likedGenre: List[str] = []
         
     
     def _generate_id(self) -> int:
-        """Génère un ID unique basé sur le timestamp"""
+        """Generate a unique ID based on timestamp."""
         import time
         return int(time.time() * 1000)
     
-    # ========== GESTION DES FAVORIS ==========
+    # ========== FAVORITES MANAGEMENT ==========
     
     def add_favorite(self, film_code: str) -> bool:
         """
-        Ajoute un film aux favoris
+        Add a movie to favorites.
         
         Args:
-            film_code: Code système du film
+            film_code: System code of the movie
             
         Returns:
-            True si ajouté, False si déjà présent
+            True if added, False if already present
         """
         if film_code not in self.favorites:
             self.favorites.append(film_code)
@@ -54,13 +54,13 @@ class User:
     
     def remove_favorite(self, film_code: str) -> bool:
         """
-        Retire un film des favoris
+        Remove a movie from favorites.
         
         Args:
-            film_code: Code système du film
+            film_code: System code of the movie
             
         Returns:
-            True si retiré, False si non présent
+            True if removed, False if not present
         """
         if film_code in self.favorites:
             self.favorites.remove(film_code)
@@ -68,58 +68,60 @@ class User:
         return False
     
     def is_favorite(self, film_code: str) -> bool:
-        """Vérifie si un film est dans les favoris"""
+        """Check if a movie is in favorites."""
         return film_code in self.favorites
     
     def get_favorite(self) -> List[str]:
-        """Retourne la liste des films favoris"""
+        """Return the list of favorite movies."""
         return self.favorites
     
-    # ========== GESTION DE LA WATCHLIST ==========
+    # ========== WATCHLIST MANAGEMENT ==========
     
     def add_to_watchlist(self, film_code: str) -> bool:
-        """Ajoute un film à la liste de lecture"""
+        """Add a movie to the watchlist."""
         if film_code not in self.watchlist:
             self.watchlist.append(film_code)
             return True
         return False
     
     def remove_from_watchlist(self, film_code: str) -> bool:
-        """Retire un film de la liste de lecture"""
+        """Remove a movie from the watchlist."""
         if film_code in self.watchlist:
             self.watchlist.remove(film_code)
             return True
         return False
     
     def is_in_watchlist(self, film_code: str) -> bool:
-        """Vérifie si un film est dans la watchlist"""
+        """Check if a movie is in the watchlist."""
         return film_code in self.watchlist
     
     def get_watchlist(self) -> List[str]:
-        """Retourne la liste des films dans la watchlist"""
+        """Return the list of movies in the watchlist."""
         return self.watchlist
-    # ========== GESTION DE L'HISTORIQUE ==========
+    
+    # ========== HISTORY MANAGEMENT ==========
     
     def mark_as_watched(self, film_code: str) -> bool:
-        """Marque un film comme vu"""
+        """Mark a movie as watched."""
         if film_code not in self.watched:
             self.watched.append(film_code)
-            # Retirer de la watchlist si présent
+            # Remove from watchlist if present
             self.remove_from_watchlist(film_code)
             return True
         return False
     
     def is_watched(self, film_code: str) -> bool:
-        """Vérifie si un film a été vu"""
+        """Check if a movie has been watched."""
         return film_code in self.watched
     
     def get_watched(self) -> List[str]:
-        """Retourne la liste des films vus"""
+        """Return the list of watched movies."""
         return self.watched
-    # ========== Gestion des genres ==========
+    
+    # ========== GENRE MANAGEMENT ==========
 
     def add_to_liked_genre(self, genre: str) -> bool:
-        """Ajoute un genre a la liste de genre aimer"""
+        """Add a genre to the liked genres list."""
         if genre not in self.likedGenre :
             self.likedGenre.append(genre)
             return True
@@ -127,27 +129,28 @@ class User:
         return False
     
     def remove_a_liked_genre(self, genre: str) -> bool:
+        """Remove a genre from the liked genres list."""
         if genre in self.likedGenre:
             self.likedGenre.remove(genre)
             return True
         return False
     
     def is_in_liked_genre(self, genre: str) -> bool:
-        """Vérifie si un genre est dans la liste des genre aimer"""
+        """Check if a genre is in the liked genres list."""
         return genre in self.likedGenre
     
     def get_liked_genre(self) -> List[str]:
-        """Retourne la liste des genre aimer"""
+        """Return the list of liked genres."""
         return self.likedGenre
     
-    # ========== SÉRIALISATION ==========
+    # ========== SERIALIZATION ==========
     
     def to_dict(self) -> Dict:
         """
-        Convertit l'utilisateur en dictionnaire pour JSON
+        Convert the user to a dictionary for JSON.
         
         Returns:
-            Dictionnaire représentant l'utilisateur
+            Dictionary representing the user
         """
         return {
             "user_id": self.user_id,
@@ -162,13 +165,13 @@ class User:
     @classmethod
     def from_dict(cls, data: Dict) -> 'User':
         """
-        Crée un utilisateur depuis un dictionnaire
+        Create a user from a dictionary.
         
         Args:
-            data: Dictionnaire contenant les données utilisateur
+            data: Dictionary containing user data
             
         Returns:
-            Instance de User
+            User instance
         """
         user = cls(
             username=data["username"],
@@ -186,15 +189,15 @@ class User:
 
 class UserManager:
     """
-    Gestionnaire pour sauvegarder et charger les utilisateurs
+    Manager for saving and loading users.
     """
     
     def __init__(self, data_file: str = "user_manager/users.json"):
         """
-        Initialise le gestionnaire d'utilisateurs
+        Initialize the user manager.
         
         Args:
-            data_file: Chemin du fichier JSON de sauvegarde
+            data_file: Path to the JSON save file
         """
         self.data_file = data_file
         self.users: Dict[int, User] = {}
@@ -202,22 +205,22 @@ class UserManager:
         self._ensure_data_directory()
     
     def _ensure_data_directory(self):
-        """Crée le dossier data s'il n'existe pas"""
+        """Create the data folder if it doesn't exist."""
         directory = os.path.dirname(self.data_file)
         if directory and not os.path.exists(directory):
             os.makedirs(directory)
     
-    # ========== CHARGEMENT ET SAUVEGARDE ==========
+    # ========== LOADING AND SAVING ==========
     
     def load_users(self) -> bool:
         """
-        Charge les utilisateurs depuis le fichier JSON
+        Load users from the JSON file.
         
         Returns:
-            True si chargement réussi, False sinon
+            True if loading successful, False otherwise
         """
         if not os.path.exists(self.data_file):
-            print(f"⚠️  Fichier {self.data_file} non trouvé, création d'une nouvelle base")
+            print(f"⚠️  File {self.data_file} not found, creating a new database")
             return False
         
         try:
@@ -229,7 +232,7 @@ class UserManager:
                 user = User.from_dict(user_data)
                 self.users[user.user_id] = user
             
-            # Charger l'utilisateur actuel
+            # Load current user
             current_user_id = data.get("current_user_id")
             if current_user_id and current_user_id in self.users:
                 self.current_user = self.users[current_user_id]
@@ -237,15 +240,15 @@ class UserManager:
             return True
             
         except Exception as e:
-            print(f"❌ Erreur lors du chargement des utilisateurs: {e}")
+            print(f"❌ Error loading users: {e}")
             return False
     
     def save_users(self) -> bool:
         """
-        Sauvegarde les utilisateurs dans le fichier JSON
+        Save users to the JSON file.
         
         Returns:
-            True si sauvegarde réussie, False sinon
+            True if saving successful, False otherwise
         """
         try:
             data = {
@@ -259,21 +262,21 @@ class UserManager:
             return True
             
         except Exception as e:
-            print(f"❌ Erreur lors de la sauvegarde: {e}")
+            print(f"❌ Error saving: {e}")
             return False
     
-    # ========== GESTION DES UTILISATEURS ==========
+    # ========== USER MANAGEMENT ==========
     
     def create_user(self, username: str, email: str = "") -> User:
         """
-        Crée un nouvel utilisateur
+        Create a new user.
         
         Args:
-            username: Nom d'utilisateur
-            email: Email de l'utilisateur
+            username: Username
+            email: User's email
             
         Returns:
-            L'utilisateur créé
+            The created user
         """
         user = User(username, email)
         self.users[user.user_id] = user
@@ -282,24 +285,24 @@ class UserManager:
         return user
     
     def get_user_by_id(self, user_id: int) -> Optional[User]:
-        """Récupère un utilisateur par son ID"""
+        """Get a user by their ID."""
         return self.users.get(user_id)
     
     def get_user_by_username(self, username: str) -> Optional[User]:
-        """Récupère un utilisateur par son nom"""
+        """Get a user by their username."""
         for user in self.users.values():
             if user.username == username:
                 return user
         return None
     
     def set_current_user(self, user: User) -> None:
-        """Définit l'utilisateur actuel"""
+        """Set the current user."""
         if user.user_id in self.users:
             self.current_user = user
             self.save_users()
     
     def delete_user(self, user_id: int) -> bool:
-        """Supprime un utilisateur"""
+        """Delete a user."""
         if user_id in self.users:
             user = self.users[user_id]
             del self.users[user_id]
@@ -310,26 +313,26 @@ class UserManager:
         return False
     
     def get_all_users(self) -> List[User]:
-        """Retourne la liste de tous les utilisateurs"""
+        """Return the list of all users."""
         return list(self.users.values())
     
-    # ========== MÉTHODES PRATIQUES ==========
+    # ========== UTILITY METHODS ==========
     
     def get_or_create_default_user(self) -> User:
         """
-        Récupère ou crée un utilisateur par défaut
-        Utile pour démarrer rapidement l'application
+        Get or create a default user.
+        Useful for quickly starting the application.
         
         Returns:
-            Utilisateur par défaut
+            Default user
         """
         if self.current_user:
             return self.current_user
         
-        # Chercher un utilisateur existant
+        # Look for an existing user
         if self.users:
             self.current_user = list(self.users.values())[0]
             return self.current_user
         
-        # Créer un utilisateur par défaut
+        # Create a default user
         return self.create_user("User", "user@netflux.com")
