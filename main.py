@@ -48,7 +48,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         # Initialize the controller (business logic layer)
         self.controller = MovieController(catalogue)
         
-        self.current_view = "acceuil"
+        self.current_view = "home"
         self.current_view_mode = "genre"
        
         self.show_movie_list_by_genre()  # Genre view with horizontal scroll
@@ -88,7 +88,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
             user = self.user_manager.current_user
             
             # Display the username (clickable to view profile)
-            profile_action = QAction(f"👤 {user.username}", self)
+            profile_action = QAction(f"{user.username}", self)
             profile_action.setEnabled(False)
             account_menu.addAction(profile_action)
             
@@ -343,7 +343,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         all_movies = self.controller.get_all_movies()
         
         # Update the display
-        self.current_view = "acceuil"
+        self.current_view = "home"
         self.current_view_mode = "genre"
         self.show_movies(all_movies)
         
@@ -362,7 +362,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         recommendations = self.controller.get_recommanded_movies(user)
         
         # Update the display (UI logic)
-        self.current_view = "recommandation"
+        self.current_view = "recommendation"
         self.current_view_mode = "genre"
         self.show_movies(recommendations)
     
@@ -446,42 +446,40 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.show_movies(favorites)
 
     def _reload_favorites_view(self):
-            """
-            Fully reload the favorites view (called with delay).
-            """
-            user = self.user_manager.current_user
-            if not user:
-                return
+        """
+        Fully reload the favorites view (called with delay).
+        """
+        user = self.user_manager.current_user
+        if not user:
+            return
 
-            print(f"[RELOAD] Reloading favorites view for {user.username}")
-        
-            favorites = self.controller.get_favorite_movies(user)
+        print(f"Reloading favorites view for {user.username}")
+    
+        favorites = self.controller.get_favorite_movies(user)
 
-            if not favorites:
-                print("No favorites to display")
-                self._clear_layout(self.gridLayout)
-            else:
-                self.show_movies(favorites)
+        if not favorites:
+            print("No favorites to display")
+            self._clear_layout(self.gridLayout)
+        else:
+            self.show_movies(favorites)
 
     def on_watchlist_clicked(self):
-            """
-            Handler to display the watchlist.
-            """
-            if not self.user_manager.current_user:
-                print("⚠️  Please log in to see your list")
-                return
-            
-            user = self.user_manager.current_user
-            print(f"📋 List of {user.username}: {user.watchlist}")
-            # TODO: Filter and display movies from the watchlist
+        """
+        Handler to display the watchlist.
+        """
+        if not self.user_manager.current_user:
+            print("Warning: Please log in to see your list")
+            return
+        
+        user = self.user_manager.current_user
+        print(f"Watch list of {user.username}: {user.watchlist}")
 
         
             
 if __name__ == "__main__":
 
-    katalogue = Catalogue()
-    katalogue.loadFromCSV()
-   # katalogue.printFilms()
+    catalog = Catalogue()
+    catalog.loadFromCSV()
 
     app = QApplication(sys.argv)
     
@@ -490,11 +488,11 @@ if __name__ == "__main__":
     if os.path.exists(style_path):
         with open(style_path, "r", encoding="utf-8") as f:
             app.setStyleSheet(f.read())
-        print(" Netflux stylesheet loaded")
+        print("Netflux stylesheet loaded")
     else:
-        print(f"  Stylesheet not found: {style_path}")
+        print(f"Error: Stylesheet not found: {style_path}")
         raise FileNotFoundError(f"The style file '{style_path}' is missing. Please make sure it exists.")
     
-    window = MainApp(katalogue)
+    window = MainApp(catalog)
     window.show()
     sys.exit(app.exec())

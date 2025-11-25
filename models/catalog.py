@@ -1,7 +1,7 @@
 """
 Catalog model for managing the movie collection.
 """
-from .film import Movie
+from .movie import Movie
 
 
 class Catalog:
@@ -38,7 +38,7 @@ class Catalog:
                 for line in f:
                     line = line.strip()
                     if not line:
-                        continue
+                        continue  # Skip empty lines
 
                     parts = [p.strip() for p in line.split(":")]
 
@@ -180,18 +180,3 @@ class Catalog:
     def __repr__(self):
         """Text representation of the catalog."""
         return f"<Catalog path='{self.path}' movies={len(self.movies)}>"
-    
-    # Legacy method names for backwards compatibility
-    loadFromCSV = load_from_csv
-    printFilms = print_movies
-    getFilmsByGenre = get_movies_by_genre
-    getFilmsFromMultipleGenres = get_movies_from_multiple_genres
-    getFilmsByTitle = get_movies_by_title
-    getFilmBySystemName = get_movie_by_system_name
-    getAllTheGenres = get_all_genres
-    getAllCatalogue = get_all_catalog
-    films = property(lambda self: self.movies)
-
-
-# Legacy class name for backwards compatibility
-Catalogue = Catalog
