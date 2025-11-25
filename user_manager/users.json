@@ -1,0 +1,39 @@
+{
+  "users": [
+    {
+      "user_id": 1762675974369,
+      "username": "alan",
+      "favorites": [
+        "la_maison_hantee"
+      ],
+      "watchlist": [],
+      "watched": [],
+      "likedGenres": [
+        "Drame",
+        "Familial",
+        "Horreur",
+        "Musical",
+        "Suspens"
+      ]
+    },
+    {
+      "user_id": 1762676638271,
+      "username": "piere",
+      "favorites": [],
+      "watchlist": [],
+      "watched": [],
+      "likedGenres": []
+    },
+    {
+      "user_id": 1763692895018,
+      "username": "pierre",
+      "favorites": [
+        "le_dernier_espion"
+      ],
+      "watchlist": [],
+      "watched": [],
+      "likedGenres": []
+    }
+  ],
+  "current_user_id": 1762675974369
+}
