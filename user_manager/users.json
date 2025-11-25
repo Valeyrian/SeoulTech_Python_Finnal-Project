@@ -3,9 +3,7 @@
     {
       "user_id": 1762675974369,
       "username": "alan",
-      "favorites": [
-        "la_maison_hantee"
-      ],
+      "favorites": [],
       "watchlist": [],
       "watched": [],
       "likedGenres": [
@@ -13,6 +11,7 @@
         "Familial",
         "Horreur",
         "Musical",
+        "Science-Fiction",
         "Suspens"
       ]
     },

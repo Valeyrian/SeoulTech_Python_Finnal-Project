@@ -479,7 +479,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
 if __name__ == "__main__":
 
     catalog = Catalogue()
-    catalog.loadFromCSV()
+    catalog.load_from_csv()
 
     app = QApplication(sys.argv)
     

@@ -191,23 +191,29 @@ While backward compatibility is maintained, developers should gradually migrate 
 ```
 finnal_project/
 ├── models/
-│   ├── __init__.py (updated)
-│   ├── film.py (updated with backward compatibility)
-│   ├── movie.py (standard English version)
-│   ├── catalogue.py (updated with backward compatibility)
-│   └── catalog.py (standard English version)
+│   ├── __init__.py (exports Movie, Film, Catalog, Catalogue)
+│   ├── movie.py (contains Movie class with Film alias)
+│   └── catalog.py (contains Catalog class with Catalogue alias)
 ├── controllers/
-│   └── movie_controller.py (updated)
+│   └── movie_controller.py
 ├── user_manager/
-│   ├── user.py (updated)
-│   └── user_dialogs.py (updated)
+│   ├── user.py
+│   └── user_dialogs.py
 ├── player/
-│   └── player.py (updated)
-├── card.py (updated)
-├── movie_card.py (standard version)
-├── genre_row.py (updated)
-└── main.py (updated)
+│   └── player.py
+├── ui/
+│   └── main_window.py
+├── card.py (movie card widget)
+├── genre_row.py
+└── main.py
 ```
+
+## Files Removed
+
+The following duplicate files were removed:
+- `models/film.py` (replaced by `models/movie.py`)
+- `models/catalogue.py` (replaced by `models/catalog.py`)
+- `movie_card.py` (replaced by `card.py`)
 
 ## Conclusion
 

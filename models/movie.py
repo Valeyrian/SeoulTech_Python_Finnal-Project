@@ -28,10 +28,16 @@ class Movie:
         """
         self.title = title
         self.minutes = int(minutes)
-        self.genres = genres  # List of strings
+        self.genres = genres
         self.system_name = system_name
         self.tile_path = f"./data/movies_tiles/{system_name}.jpg"
         self.video_path = f"./data/movies/{system_name}.mp4"
+        
+        # Legacy attribute names for backwards compatibility
+        self.titre = self.title
+        self.minute = self.minutes
+        self.tiles = self.tile_path
+        self.video = self.video_path
     
     def __repr__(self):
         """Text representation of the movie."""
@@ -77,3 +83,7 @@ class Movie:
         words = keywords.lower().split()
         title_lower = self.title.lower()
         return any(word in title_lower for word in words)
+
+
+# Legacy class name for backwards compatibility
+Film = Movie
