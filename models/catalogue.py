@@ -1,49 +1,49 @@
 """
-Modèle Catalogue pour gérer la collection de films
+Catalogue model for managing the movie collection.
 """
 from .film import Film
 
 
 class Catalogue:
     """
-    Gère la collection de films et fournit des méthodes de recherche/filtrage
+    Manages the movie collection and provides search/filtering methods.
     
     Attributes:
-        path (str): Chemin vers le fichier CSV
-        films (list[Film]): Liste des films chargés
+        path (str): Path to the CSV file
+        films (list[Film]): List of loaded movies
     """
     
     def __init__(self, path="./data/catalogue.csv"):
         """
-        Initialise le catalogue
+        Initialize the catalogue.
         
         Args:
-            path (str): Chemin vers le fichier CSV des films
+            path (str): Path to the movies CSV file
         """
         self.path = path
         self.films = []
     
     def loadFromCSV(self):
         """
-        Charge les films depuis le fichier CSV
-        Format attendu: titre:minute:genres:system_name
-        Les genres sont séparés par des virgules
+        Load movies from the CSV file.
+        Expected format: title:minutes:genres:system_name
+        Genres are separated by commas.
         
         Raises:
-            FileNotFoundError: Si le fichier CSV n'existe pas
-            ValueError: Si une ligne a un format invalide
+            FileNotFoundError: If the CSV file does not exist
+            ValueError: If a line has an invalid format
         """
         try:
             with open(self.path, "r", encoding="utf-8") as f:
-                for ligne in f:
-                    ligne = ligne.strip()
-                    if not ligne:
-                        continue  # ignorer les lignes vides
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue  # Skip empty lines
 
-                    parts = [p.strip() for p in ligne.split(":")]
+                    parts = [p.strip() for p in line.split(":")]
 
                     if len(parts) != 4:
-                        print(f"⚠️  Ligne ignorée (format invalide) : {ligne}")
+                        print(f"⚠️  Line skipped (invalid format): {line}")
                         continue
 
                     titre, minute, genres, system_name = parts
@@ -52,28 +52,28 @@ class Catalogue:
                     film = Film(titre, minute, genre_list, system_name)
                     self.films.append(film)
                     
-            print(f" {len(self.films)} film(s) chargé(s) depuis {self.path}")
+            print(f" {len(self.films)} movie(s) loaded from {self.path}")
         except FileNotFoundError:
-            print(f" Fichier non trouvé : {self.path}")
+            print(f" File not found: {self.path}")
             raise
         except Exception as e:
-            print(f" Erreur lors du chargement du catalogue : {e}")
+            print(f" Error loading the catalogue: {e}")
             raise
     
     def printFilms(self):
-        """Affiche tous les films dans la console"""
+        """Display all movies in the console."""
         for film in self.films:
             print(film)
     
     def getFilmsByGenre(self, genre):
         """
-        Récupère tous les films d'un genre donné
+        Get all movies of a given genre.
         
         Args:
-            genre (str): Genre à rechercher
+            genre (str): Genre to search for
             
         Returns:
-            list[Film]: Liste des films correspondants
+            list[Film]: List of matching movies
         """
         results = []
         for film in self.films:
@@ -83,13 +83,13 @@ class Catalogue:
     
     def getFilmsFromMultipleGenres(self, genres_list):
         """
-        Récupère les films appartenant à au moins un des genres de la liste
+        Get movies belonging to at least one of the genres in the list.
         
         Args:
-            genres_list (list[str]): Liste des genres recherchés
+            genres_list (list[str]): List of genres to search for
             
         Returns:
-            list[Film]: Films correspondant à au moins un genre
+            list[Film]: Movies matching at least one genre
         """
         if not genres_list:
             return []
@@ -102,36 +102,36 @@ class Catalogue:
     
     def getFilmsByTitle(self, keywords):
         """
-        Recherche des films par mots-clés dans le titre
+        Search for movies by keywords in the title.
         
         Args:
-            keywords (str): Mots-clés séparés par des espaces
+            keywords (str): Keywords separated by spaces
             
         Returns:
-            list[Film]: Films dont le titre contient au moins un mot-clé
+            list[Film]: Movies whose title contains at least one keyword
         """
         if not keywords:
             return []
             
-        mots = keywords.lower().split()
+        words = keywords.lower().split()
         results = []
 
         for film in self.films:
-            titre = film.titre.lower()
-            if any(mot in titre for mot in mots):
+            title = film.titre.lower()
+            if any(word in title for word in words):
                 results.append(film)
 
         return results
     
     def getFilmBySystemName(self, system_name):
         """
-        Récupère un film par son identifiant système
+        Get a movie by its system identifier.
         
         Args:
-            system_name (str): Identifiant système du film
+            system_name (str): System identifier of the movie
             
         Returns:
-            Film|None: Le film trouvé ou None
+            Film|None: The found movie or None
         """
         for film in self.films:
             if film.system_name == system_name:
@@ -140,10 +140,10 @@ class Catalogue:
     
     def getAllTheGenres(self):
         """
-        Récupère tous les genres uniques du catalogue
+        Get all unique genres from the catalogue.
         
         Returns:
-            list[str]: Liste triée des genres
+            list[str]: Sorted list of genres
         """
         genres = set()
         for film in self.films:
@@ -153,30 +153,30 @@ class Catalogue:
     
     def getAllCatalogue(self):
         """
-        Récupère tous les films du catalogue
+        Get all movies from the catalogue.
         
         Returns:
-            list[Film]: Liste complète des films
+            list[Film]: Complete list of movies
         """
         return self.films
     
     def get_film_count(self):
         """
-        Retourne le nombre de films dans le catalogue
+        Return the number of movies in the catalogue.
         
         Returns:
-            int: Nombre de films
+            int: Number of movies
         """
         return len(self.films)
     
     def __len__(self):
-        """Permet d'utiliser len(catalogue)"""
+        """Allow using len(catalogue)."""
         return len(self.films)
     
     def __iter__(self):
-        """Permet d'itérer sur les films : for film in catalogue"""
+        """Allow iterating over movies: for film in catalogue."""
         return iter(self.films)
     
     def __repr__(self):
-        """Représentation textuelle du catalogue"""
+        """Text representation of the catalogue."""
         return f"<Catalogue path='{self.path}' films={len(self.films)}>"
