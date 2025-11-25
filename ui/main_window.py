@@ -103,9 +103,9 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.acceuilButton.setText(_translate("MainWindow", "Accueil"))
-        self.recomandationButton.setText(_translate("MainWindow", "Recomandation"))
-        self.searchBar.setPlaceholderText(_translate("MainWindow", "Recherchez votre contenue !"))
+        self.acceuilButton.setText(_translate("MainWindow", "Home"))
+        self.recomandationButton.setText(_translate("MainWindow", "Recommendations"))
+        self.searchBar.setPlaceholderText(_translate("MainWindow", "Search for your content!"))
         self.searchButton.setText(_translate("MainWindow", "go"))
         self.accountButton.setText(_translate("MainWindow", "Account"))
 

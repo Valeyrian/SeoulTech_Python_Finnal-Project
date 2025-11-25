@@ -1,5 +1,5 @@
 """
-Widget pour afficher une rangée de films par genre avec scroll horizontal
+Widget for displaying a row of movies by genre with horizontal scrolling.
 """
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QFrame
 from PyQt6.QtCore import Qt
@@ -7,43 +7,43 @@ import card
 
 
 class GenreRow(QWidget):
-    """Widget représentant une section de genre avec scroll horizontal"""
+    """Widget representing a genre section with horizontal scrolling."""
     
     def __init__(self, genre_name, films, user_manager=None, parent=None):
         super().__init__(parent)
         self.genre_name = genre_name
         self.films = films
         self.user_manager = user_manager
-        self.cards = []  # Liste pour stocker les cartes
+        self.cards = []  # List to store cards
         self.setup_ui()
     
     def get_cards(self):
-        """Retourne la liste des cartes de cette rangée"""
+        """Return the list of cards in this row."""
         return self.cards
     
     def setup_ui(self):
-        """Configure l'interface de la rangée de genre"""
-        # Layout principal vertical
+        """Configure the genre row interface."""
+        # Main vertical layout
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(16, 8, 16, 4)  # Réduction des marges verticales
-        main_layout.setSpacing(8)  # Réduction de l'espacement entre titre et cartes
+        main_layout.setContentsMargins(16, 8, 16, 4)  # Reduced vertical margins
+        main_layout.setSpacing(8)  # Reduced spacing between title and cards
         
-        # Header avec le nom du genre
+        # Header with genre name
         genre_label = QLabel(self.genre_name)
         genre_label.setObjectName("genreHeader")
         main_layout.addWidget(genre_label)
         
-        # Scroll Area pour les cartes de films
+        # Scroll area for movie cards
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setObjectName("genreScrollArea")
-        scroll_area.setMinimumHeight(180)  # Hauteur ajustée pour nouvelles cartes (160px + marges)
+        scroll_area.setMinimumHeight(180)  # Adjusted height for new cards (160px + margins)
         scroll_area.setMaximumHeight(180)
         
-        # Widget conteneur pour les cartes
+        # Container widget for cards
         cards_container = QWidget()
         cards_container.setObjectName("cardsContainer")
         cards_layout = QHBoxLayout(cards_container)
@@ -51,19 +51,19 @@ class GenreRow(QWidget):
         cards_layout.setSpacing(12)
         cards_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
-        # Ajouter les cartes de films
+        # Add movie cards
         for film in self.films:
             card_widget = card.createFilmCard(film, self.user_manager)
-            self.cards.append(card_widget)  # Enregistrer la carte
+            self.cards.append(card_widget)  # Register the card
             cards_layout.addWidget(card_widget)
         
-        # Ajouter un stretch à la fin pour éviter l'étirement des cartes
+        # Add stretch at the end to prevent card stretching
         cards_layout.addStretch()
         
-        # Configurer le scroll area
+        # Configure the scroll area
         scroll_area.setWidget(cards_container)
         main_layout.addWidget(scroll_area)
         
-        # Style du widget et taille
+        # Widget style and size
         self.setObjectName("genreRow")
-        self.setMinimumHeight(220)  # Hauteur totale réduite : header + scroll area + marges
+        self.setMinimumHeight(220)  # Reduced total height: header + scroll area + margins

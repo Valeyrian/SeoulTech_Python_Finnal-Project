@@ -1,43 +1,44 @@
 """
-MovieController - Contrôleur pour gérer la logique métier des films
-Responsabilités :
-- Recherche et filtrage des films
-- Gestion des états de l'application
-- Interface entre le modèle (Catalogue) et la vue (MainApp)
+MovieController - Controller for managing movie business logic.
+
+Responsibilities:
+    - Movie search and filtering
+    - Application state management
+    - Interface between the model (Catalogue) and the view (MainApp)
 """
 
 class MovieController:
-    """Contrôleur pour la gestion des films"""
+    """Controller for movie management."""
     
     def __init__(self, catalogue):
         """
-        Initialise le contrôleur avec un catalogue
+        Initialize the controller with a catalogue.
         
         Args:
-            catalogue: Instance de Catalogue contenant les films
+            catalogue: Catalogue instance containing the movies
         """
         self.catalogue = catalogue
-        self._current_filter = None  # filtre actif (None = tous les films)
-        self._current_search = ""    # recherche active
+        self._current_filter = None  # Active filter (None = all movies)
+        self._current_search = ""    # Active search query
     
     def get_all_movies(self):
         """
-        Retourne tous les films du catalogue
+        Return all movies from the catalogue.
         
         Returns:
-            list: Liste de tous les objets Film
+            list: List of all Film objects
         """
         return self.catalogue.getAllCatalogue()
     
     def search_movies(self, query):
         """
-        Recherche des films par titre
+        Search for movies by title.
         
         Args:
-            query (str): Texte de recherche (mots-clés)
+            query (str): Search text (keywords)
         
         Returns:
-            list: Films correspondant à la recherche, ou tous les films si query vide
+            list: Movies matching the search, or all movies if query is empty
         """
         self._current_search = query.strip()
         
@@ -48,51 +49,51 @@ class MovieController:
     
     def filter_by_genre(self, genre):
         """
-        Filtre les films par genre
+        Filter movies by genre.
         
         Args:
-            genre (str): Genre à filtrer (ex: "Action", "Comedie")
+            genre (str): Genre to filter (e.g., "Action", "Comedy")
         
         Returns:
-            list: Films du genre spécifié
+            list: Movies of the specified genre
         """
         self._current_filter = genre
         return self.catalogue.getFilmsByGenre(genre)
     
     def get_available_genres(self):
         """
-        Retourne la liste de tous les genres disponibles (sans doublons)
+        Return the list of all available genres (without duplicates).
         
         Returns:
-            list: Liste des genres uniques triés
+            list: Sorted list of unique genres
         """
         return list(self.catalogue.getAllTheGenres())
     
     def get_movies_grouped_by_genre(self, movie_list=None):
         """
-        Retourne un dict {genre: [films]} groupé par genre
+        Return a dict {genre: [movies]} grouped by genre.
         
         Args:
-            movie_list (list, optional): Liste de films à grouper.
-                                        Si None, utilise tous les films du catalogue
+            movie_list (list, optional): List of movies to group.
+                                        If None, uses all movies from the catalogue.
         
         Returns:
-            dict: Dictionnaire avec les genres en clés et listes de films en valeurs
+            dict: Dictionary with genres as keys and lists of movies as values
         """
-        # Si aucune liste fournie, prendre tous les films
+        # If no list provided, get all movies
         if movie_list is None:
             movie_list = self.get_all_movies()
         
         grouped = {}
         
-        # Parcourir tous les films de la liste
+        # Iterate through all movies in the list
         for film in movie_list:
-            # Pour chaque genre du film
+            # For each genre of the movie
             for genre in film.genres:
-                # Créer la liste du genre si elle n'existe pas
+                # Create the genre list if it doesn't exist
                 if genre not in grouped:
                     grouped[genre] = []
-                # Ajouter le film à ce genre (éviter les doublons)
+                # Add the movie to this genre (avoid duplicates)
                 if film not in grouped[genre]:
                     grouped[genre].append(film)
         
@@ -100,10 +101,10 @@ class MovieController:
     
     def get_current_view(self):
         """
-        Retourne les films à afficher selon le filtre/recherche actif
+        Return the movies to display based on the active filter/search.
         
         Returns:
-            list: Films correspondant à l'état actuel
+            list: Movies matching the current state
         """
         if self._current_search:
             return self.search_movies(self._current_search)
@@ -113,24 +114,24 @@ class MovieController:
             return self.get_all_movies()
     
     def reset_filters(self):
-        """Réinitialise tous les filtres et recherches"""
+        """Reset all filters and searches."""
         self._current_filter = None
         self._current_search = ""
         return self.get_all_movies()
     
     def get_movie_count(self):
-        """Retourne le nombre total de films dans le catalogue"""
+        """Return the total number of movies in the catalogue."""
         return len(self.catalogue.films)
 
     def get_recommanded_movies(self,user):
         """
-        Retourne une liste de films recommandés basée sur les genres préférés de l'utilisateur
+        Return a list of recommended movies based on the user's preferred genres.
         
         Args:
-            user: Instance de User contenant les préférences de genres
+            user: User instance containing genre preferences
         
         Returns:
-            list: Films correspondant aux genres préférés de l'utilisateur
+            list: Movies matching the user's preferred genres
         """
         if not user or not user.likedGenre:
             return []
@@ -139,13 +140,13 @@ class MovieController:
     
     def get_favorite_movies(self, user):
         """
-        Retourne une liste de films favoris de l'utilisateur
+        Return a list of the user's favorite movies.
         
         Args:
-            user: Instance de User contenant les films favoris
+            user: User instance containing favorite movies
         
         Returns:
-            list: Films favoris de l'utilisateur
+            list: User's favorite movies
         """
         if not user or not user.favorites:
             return []
