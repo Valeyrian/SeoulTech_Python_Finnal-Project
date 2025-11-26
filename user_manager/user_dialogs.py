@@ -7,7 +7,8 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                             QCheckBox, QScrollArea, QWidget, QGridLayout)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
-from user_manager.user import UserManager
+
+from .user import UserManager
 
 
 class LoginDialog(QDialog):

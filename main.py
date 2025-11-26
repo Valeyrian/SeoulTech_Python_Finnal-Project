@@ -1,19 +1,18 @@
 import sys
-from unittest import case
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QMenu
+import os
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMenu
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QPixmap, QAction
-from PyQt6.QtMultimediaWidgets import QVideoWidget
-from ui.main_window import Ui_MainWindow
-from controllers.movie_controller import MovieController
-from genre_row import GenreRow
+
+from ui import Ui_MainWindow
+from controllers import MovieController
 from models import Catalog
-from card import createFilmCard
-import os
-from user_manager.user import UserManager
+from user_manager import UserManager
 from user_manager.user_dialogs import show_login_dialog, confirm_logout, show_genre_preferences_dialog
-from player.player import Player
-from movie_detail_modal import MovieDetailModal
+from widgets.genre_row import GenreRow
+from widgets.card import createFilmCard
+from widgets.movie_detail_modal import MovieDetailModal
+
 
 class MainApp(QMainWindow, Ui_MainWindow):
     """
@@ -201,6 +200,9 @@ class MainApp(QMainWindow, Ui_MainWindow):
             elif getattr(self, "current_view", "") == "recommendation":
                 user = getattr(self.user_manager, "current_user", None)
                 movie_list = self.controller.get_recommended_movies(user) if user else []
+            elif getattr(self, "current_view", "") == "watchlist":
+                user = getattr(self.user_manager, "current_user", None)
+                movie_list = self.controller.get_wathclist_movie(user) if user else []
             else:
                 # default: all movies
                 movie_list = self.controller.get_all_movies()
@@ -487,13 +489,20 @@ class MainApp(QMainWindow, Ui_MainWindow):
         """
         Handler to display the watchlist.
         """
-        if not self.user_manager.current_user:
+        user = self.user_manager.current_user
+
+        if not user:
             print("Warning: Please log in to see your list")
             return
         
-        user = self.user_manager.current_user
         print(f"Watch list of {user.username}: {user.watchlist}")
    
+        wacthlist = self.controller.get_wathclist_movie(user)
+        
+        self.current_view = "watchlist"
+        self.current_view_mode = "genre"
+        self.show_movies(wacthlist)
+
     def _reload_favorites_view(self):
         """
         Fully reload the favorites view (called with delay).

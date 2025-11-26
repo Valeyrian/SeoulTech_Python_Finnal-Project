@@ -4,17 +4,21 @@
       "user_id": 1764150639486,
       "username": "Alan",
       "favorites": [
-        "pirates_des_caraibes",
-        "evasion"
+        "evasion",
+        "les_reves_d_anna"
       ],
       "watchlist": [
+        "pirates_des_caraibes",
+        "les_reves_d_anna",
         "evasion"
       ],
       "watched": [
         "hyperloop",
         "pirates_des_caraibes"
       ],
-      "likedGenres": []
+      "likedGenres": [
+        "Musical"
+      ]
     }
   ],
   "current_user_id": 1764150639486
