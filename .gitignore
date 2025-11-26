@@ -1,7 +1,3 @@
-/__pycache__
+__pycache__/
 /.vscode/
-/controls/__pycache__
-/models/__pycache__
-/player/__pycache__
-/ui/__pycache__
-/user_manager/__pycache__
+/.vs

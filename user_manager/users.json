@@ -3,7 +3,9 @@
     {
       "user_id": 1762675974369,
       "username": "alan",
-      "favorites": [],
+      "favorites": [
+        "pirates_des_caraibes"
+      ],
       "watchlist": [],
       "watched": [],
       "likedGenres": [
@@ -11,6 +13,7 @@
         "Familial",
         "Horreur",
         "Musical",
+        "Policier",
         "Science-Fiction",
         "Suspens"
       ]
