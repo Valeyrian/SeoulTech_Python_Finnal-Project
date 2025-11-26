@@ -167,6 +167,21 @@ class User:
             return True
         return False
     
+    def unmark_as_watched(self, film_code: str) -> bool:
+        """
+        Unmark a movie as watched.
+        
+        Args:
+            film_code: System code of the movie
+        Returns:
+            bool: True if unmarked, False if not present
+        """
+        if film_code in self.watched:
+            self.watched.remove(film_code)
+            return True
+        return False
+
+
     def is_watched(self, film_code: str) -> bool:
         """
         Check if a movie has been watched.

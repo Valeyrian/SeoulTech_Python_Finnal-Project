@@ -13,6 +13,7 @@ import os
 from user_manager.user import UserManager
 from user_manager.user_dialogs import show_login_dialog, confirm_logout, show_genre_preferences_dialog
 from player.player import Player
+from movie_detail_modal import MovieDetailModal
 
 class MainApp(QMainWindow, Ui_MainWindow):
     """
@@ -27,7 +28,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)  
         self.setWindowTitle("Netflux")
-
+        self.setMinimumSize(1024, 768)
         if (not os.path.exists("./assets/logo.png")):
             pixmap = QPixmap("./assets/file_not_found.jpeg")
             raise FileNotFoundError("The file './assets/logo.png' is missing. Please make sure it exists.")
@@ -49,9 +50,8 @@ class MainApp(QMainWindow, Ui_MainWindow):
         
         self.current_view = "home"
         self.current_view_mode = "genre"
-       
-        self.show_movie_list_by_genre()  # Genre view with horizontal scroll
-       
+      
+        self.show_movies()  # Genre view with horizontal scroll
         
         # List to store all displayed cards (for synchronization)
         self.displayed_cards = []
@@ -98,10 +98,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
             favorites_action.triggered.connect(self.on_favorites_clicked)
             account_menu.addAction(favorites_action)
             
-            # # Watchlist option
-            # watchlist_action = QAction("My watch list", self)
-            # watchlist_action.triggered.connect(self.on_watchlist_clicked)
-            # account_menu.addAction(watchlist_action)
+            # watchlist option
+            watchlist_action = QAction("My watch list", self)
+            watchlist_action.triggered.connect(self.on_watchlist_clicked)
+            account_menu.addAction(watchlist_action)
 
             genre_action = QAction("My genre preferences", self)
             genre_action.triggered.connect(self.on_genre_preferences_clicked)
@@ -152,7 +152,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         """
         # Connect the like status change signal
         card.like_changed.connect(self._sync_all_cards_like_state)
-        #card.play_clicked.connect(self.startMediaPlayer)
+        card.play_clicked.connect(self.show_movie_detail_modal)
     
     def _sync_all_cards_like_state(self, film_id, is_liked):
         """
@@ -168,9 +168,9 @@ class MainApp(QMainWindow, Ui_MainWindow):
             if hasattr(card, 'sync_like_state'):
                 card.sync_like_state(film_id, is_liked)
 
-        if self.current_view_mode == "favorites":
+        if self.current_view == "favorites" and not is_liked:
             # If in favorites view, refresh display to remove unliked movies
-            QTimer.singleShot(100, self._reload_favorites_view)
+            QTimer.singleShot(200, self._reload_favorites_view)
     
     def resizeEvent(self, event):
         """
@@ -178,68 +178,93 @@ class MainApp(QMainWindow, Ui_MainWindow):
         Reorganizes cards when the window size changes.
         """
         super().resizeEvent(event)
-        
-        # Redisplay movies with the new column count
-        if hasattr(self, 'controller') and self.gridLayout.count() > 0:
-            # Check if we're in grid mode or genre mode
-            first_item = self.gridLayout.itemAt(0)
-            if first_item and first_item.widget():
-                if isinstance(first_item.widget(), GenreRow):
-                    # Genre mode: reorganize GenreRows with new span
-                    current_query = self.searchBar.text().strip()
-                    if current_query:
-                        movie_list = self.controller.search_movies(current_query)
-                    else:
-                        movie_list = self.controller.get_all_movies()
-                    self.show_movie_list_by_genre(movie_list)
-                else:
-                    # Grid mode: reorganize cards
-                    current_query = self.searchBar.text().strip()
-                    if current_query:
-                        movie_list = self.controller.search_movies(current_query)
-                    else:
-                        movie_list = self.controller.get_all_movies()
-                    self.show_movie_list(movie_list)
+
+        # Minimal conditions to reorganize
+        if not hasattr(self, "controller") or self.gridLayout.count() == 0:
+            return
+
+        # get current search query
+        current_query = ""
+        try:
+            current_query = self.searchBar.text().strip()
+        except Exception:
+            current_query = ""
+
+        # get the current list of movies to display
+        if current_query:
+            movie_list = self.controller.search_movies(current_query)
+        else:
+            # no research, get movies based on current view
+            if getattr(self, "current_view", "") == "favorites":
+                user = getattr(self.user_manager, "current_user", None)
+                movie_list = self.controller.get_favorite_movies(user) if user else []
+            elif getattr(self, "current_view", "") == "recommendation":
+                user = getattr(self.user_manager, "current_user", None)
+                movie_list = self.controller.get_recommended_movies(user) if user else []
+            else:
+                # default: all movies
+                movie_list = self.controller.get_all_movies()
+
+        # use a try-except to avoid blocking the UI in case of error
+        try:
+            self.show_movies(movie_list)
+        except Exception:
+            pass
     
-    def show_movie_list(self, movie_list=None):
+    def _show_movie_list_by_grid(self, movie_list):
         """
-        Update the display of movie cards.
+        Update the display of movie cards with improved centering for short lists.
         
         Args:
             movie_list (list, optional): List of movies to display.
-                                        If None, requests movies from the controller.
         """
-        # If no list provided, request from controller
-        if movie_list is None:
-            movie_list = self.controller.get_all_movies()
         
         # Use the layout dedicated to movies (defined in main_window.py)
         layout = self.gridLayout
         
-        # Properly clear old cards
-        self._clear_layout(layout)
-        
         # Reset the list of displayed cards
         self.displayed_cards = []
         
-        # Add new cards in grid layout
-        row, col = 0, 0
-        max_col = self._calculate_columns()  # Dynamic column count calculation
+        # Dynamic column count calculation
+        max_col = self._calculate_columns()
         
-        for film in movie_list:
-            card_widget = createFilmCard(film, self.user_manager)
+        # Calculate if we need centering (for short lists)
+        num_movies = len(movie_list)
+        
+        # For small lists, center the grid
+        if num_movies < max_col:
+            # Center a single row
+            start_col = (max_col - num_movies) // 2
+            row = 0
+            col = start_col
             
-            # Connect card signals
-            self._connect_card_signals(card_widget)
+            for film in movie_list:
+                card_widget = createFilmCard(film, self.user_manager)
+                self._connect_card_signals(card_widget)
+                self.displayed_cards.append(card_widget)
+                
+                layout.addWidget(card_widget, row, col)
+                col += 1
+        else:
+            # Normal grid layout for longer lists
+            row, col = 0, 0
             
-            # Register the card for synchronization
-            self.displayed_cards.append(card_widget)
+            for film in movie_list:
+                card_widget = createFilmCard(film, self.user_manager)
+                self._connect_card_signals(card_widget)
+                self.displayed_cards.append(card_widget)
+                
+                layout.addWidget(card_widget, row, col)
+                col += 1
+                if col >= max_col:
+                    col = 0
+                    row += 1
             
-            layout.addWidget(card_widget, row, col)
-            col += 1
-            if col >= max_col:
-                col = 0
-                row += 1
+            # For the last incomplete row, center it if desired
+            last_row_items = num_movies % max_col
+            if last_row_items > 0 and last_row_items < max_col // 2:
+                # Optionally add spacing for better centering of last row
+                layout.setColumnStretch(max_col, 1)
         
         # Force scroll area update
         try:
@@ -247,19 +272,16 @@ class MainApp(QMainWindow, Ui_MainWindow):
         except Exception:
             pass
     
-    def show_movie_list_by_genre(self,movie_list=None):
+    def _show_movie_list_by_genre(self,movie_list):
         """
         Display movies organized by genre with horizontal scrolling.
         Netflix-style layout with one row per genre.
         """
         # Get movies grouped by genre from the controller
-        if movie_list is None:
-            movie_list = self.controller.get_all_movies()
         grouped_movies = self.controller.get_movies_grouped_by_genre(movie_list)
         
-        # Clear the current layout
+        # get the current layout
         layout = self.gridLayout
-        self._clear_layout(layout)
         
         # Reset the list of displayed cards
         self.displayed_cards = []
@@ -288,19 +310,26 @@ class MainApp(QMainWindow, Ui_MainWindow):
         except Exception:
             pass
 
-    def show_movies(self,movie_list):
+    def show_movies(self,movie_list=None):
         """
         Display a given list of movies according to the current view mode.
         
         Args:
             movie_list (list): List of movies to display
+                                if None, displays all movies.
         """
+
+        # If no list provided, request from controller
+        if movie_list is None:
+            movie_list = self.controller.get_all_movies()
+            
+        # Clear existing layout
         self._clear_layout(self.gridLayout)
 
         if self.current_view_mode == "genre":
-            self.show_movie_list_by_genre(movie_list)
+            self._show_movie_list_by_genre(movie_list)
         elif self.current_view_mode == "grid":
-            self.show_movie_list(movie_list)
+            self._show_movie_list_by_grid(movie_list)
             
     def _clear_layout(self, layout):
         """
@@ -323,10 +352,21 @@ class MainApp(QMainWindow, Ui_MainWindow):
                 if sub_layout:
                     self._clear_layout(sub_layout)
     
-  ##  def playVideo(self, movie):
-       ## player.startMediaPlayer(movie)
+    def show_movie_detail_modal(self, movie):
+        """
+        Display the movie detail window.
+    
+        Args:
+            movie: Movie instance to display
+        """
+        # Create a new window 
+        self.detail_window = MovieDetailModal(movie, self.user_manager, self)
+    
+        # Connect signals for synchronization
+        self.detail_window.like_changed.connect(self._sync_all_cards_like_state)
         
-        
+        # Show as a separate window
+        self.detail_window.show()
    
     # ========== EVENT HANDLERS ==========
     
@@ -379,7 +419,6 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.current_view = "search"
         self.current_view_mode = "grid"
         self.show_movies(results)
-
 
 
     # ========== ACCOUNT MENU HANDLERS ==========
@@ -444,12 +483,26 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.current_view_mode = "grid"
         self.show_movies(favorites)
 
+    def on_watchlist_clicked(self):
+        """
+        Handler to display the watchlist.
+        """
+        if not self.user_manager.current_user:
+            print("Warning: Please log in to see your list")
+            return
+        
+        user = self.user_manager.current_user
+        print(f"Watch list of {user.username}: {user.watchlist}")
+   
     def _reload_favorites_view(self):
         """
         Fully reload the favorites view (called with delay).
         """
         user = self.user_manager.current_user
         if not user:
+            return
+
+        if self.current_view != "favorites":
             return
 
         print(f"Reloading favorites view for {user.username}")
@@ -461,23 +514,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
             self._clear_layout(self.gridLayout)
         else:
             self.show_movies(favorites)
-
-    def on_watchlist_clicked(self):
-        """
-        Handler to display the watchlist.
-        """
-        if not self.user_manager.current_user:
-            print("Warning: Please log in to see your list")
-            return
-        
-        user = self.user_manager.current_user
-        print(f"Watch list of {user.username}: {user.watchlist}")
-
-        
             
 if __name__ == "__main__":
 
-    catalog = Catalog()
+    catalog = Catalog("./csv_data/catalog.csv")
     catalog.load_from_csv()
 
     app = QApplication(sys.argv)
@@ -485,7 +525,7 @@ if __name__ == "__main__":
     # Load the Netflux stylesheet
     style_path = "./assets/styles.qss"
     if os.path.exists(style_path):
-        with open(style_path, "r", encoding="utf-8") as f:
+        with open(style_path, "r", encoding="utf-8") as f: 
             app.setStyleSheet(f.read())
         print("Netflux stylesheet loaded")
     else:

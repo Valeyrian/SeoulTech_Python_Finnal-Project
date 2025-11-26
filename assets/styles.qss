@@ -722,3 +722,193 @@ QMessageBox QLabel {
 QMessageBox QPushButton {
     min-width: 80px;
 }
+
+/* ===================================
+   MOVIE DETAIL MODAL
+   =================================== */
+
+/* Modal container */
+QFrame#movieDetailModal {
+    background-color: #141414;
+    border-radius: 12px;
+}
+
+/* Video container */
+QFrame#videoContainer {
+    background-color: #000000;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+/* Close button (X) */
+QPushButton#closeButton {
+    background-color: #8B5CF6;
+    color: #FFFFFF;
+    border: 2px solid #FFFFFF;
+    border-radius: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 0;
+}
+
+QPushButton#closeButton:hover {
+    background-color: #E50914;
+    border: 2px solid #FFFFFF;
+    color: #FFFFFF;
+}
+
+QPushButton#closeButton:pressed {
+    background-color: #7C3AED;
+    border: 2px solid #FFFFFF;
+}
+
+/* Info section */
+QFrame#infoSection {
+    background-color: #141414;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* Modal title */
+QLabel#modalTitle {
+    color: #FFFFFF;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* Modal year */
+QLabel#modalYear {
+    color: #999999;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Modal metadata */
+QLabel#modalMetadata {
+    color: #B3B3B3;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+/* Synopsis title */
+QLabel#synopsisTitle {
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* Synopsis text area */
+QTextEdit#synopsisText {
+    background-color: transparent;
+    color: #E5E5E5;
+    border: none;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Credits labels */
+QLabel#creditsLabel {
+    color: #E5E5E5;
+    font-size: 13px;
+}
+
+/* Watch button in modal */
+QPushButton#watchButton {
+    background-color: #8B5CF6;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    min-width: 120px;
+}
+
+QPushButton#watchButton:hover {
+    background-color: #9D6FFF;
+}
+
+QPushButton#watchButton:pressed {
+    background-color: #7C3AED;
+}
+
+/* Large like button in modal */
+QPushButton#likeButtonLarge {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 100px;
+}
+
+QPushButton#likeButtonLarge:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid #FFFFFF;
+}
+
+QPushButton#likeButtonLarge[liked="true"] {
+    background-color: rgba(229, 9, 20, 0.2);
+    color: #E50914;
+    border: 2px solid #E50914;
+}
+
+QPushButton#likeButtonLarge[liked="true"]:hover {
+    background-color: rgba(229, 9, 20, 0.3);
+}
+
+/* Watchlist button */
+QPushButton#watchlistButton {
+    background-color: transparent;
+    color: #FFFFFF;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 120px;
+}
+
+QPushButton#watchlistButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid #FFFFFF;
+}
+
+QPushButton#watchlistButton[in_watchlist="true"] {
+    background-color: rgba(139, 92, 246, 0.2);
+    color: #8B5CF6;
+    border: 2px solid #8B5CF6;
+}
+
+QPushButton#watchlistButton[in_watchlist="true"]:hover {
+    background-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Watched button */
+QPushButton#watchedButton {
+    background-color: transparent;
+    color: #FFFFFF;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 140px;
+}
+
+QPushButton#watchedButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid #FFFFFF;
+}
+
+QPushButton#watchedButton[watched="true"] {
+    background-color: rgba(139, 92, 246, 0.2);
+    color: #8B5CF6;
+    border: 2px solid #8B5CF6;
+}
+
+QPushButton#watchedButton[watched="true"]:hover {
+    background-color: rgba(139, 92, 246, 0.3);
+}

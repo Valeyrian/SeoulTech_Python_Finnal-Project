@@ -154,7 +154,7 @@ class FilmCard(QFrame):
         parent_layout.addWidget(self.like_button, alignment=Qt.AlignmentFlag.AlignVCenter)
 
         # Play button
-        self.play_button = QPushButton("▶")
+        self.play_button = QPushButton("➕")
         self.play_button.setObjectName("playButtonMini")
         self.play_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.play_button.setMinimumSize(28, 28)
@@ -215,7 +215,7 @@ class FilmCard(QFrame):
      
     def on_play_clicked(self):
         """Handler for the play button click."""
-        print(f"Playing: {self.movie.title}")
+        print(f"Opening details for: {self.movie.title}")
         self.play_clicked.emit(self.movie)
     
     def sync_like_state(self, movie_id, is_liked):

@@ -13,7 +13,7 @@ class Catalog:
         movies (list[Movie]): List of loaded movies
     """
     
-    def __init__(self, path="./data/catalogue.csv"):
+    def __init__(self, path):
         """
         Initialize the catalog.
         
@@ -26,30 +26,47 @@ class Catalog:
     def load_from_csv(self):
         """
         Load movies from the CSV file.
-        Expected format: title:minutes:genres:system_name
+        Expected format: title:year:minutes:genres:system_name:director:cast:synopsis
         Genres are separated by commas.
+        First line is the header (skipped).
         
         Raises:
             FileNotFoundError: If the CSV file does not exist
             ValueError: If a line has an invalid format
         """
         try:
-            with open(self.path, "r", encoding="utf-8") as f:
-                for line in f:
+            with open(self.path, "r", encoding="utf-8-sig") as f:
+                lines = f.readlines()
+                
+                # Skip the header line
+                if lines and lines[0].strip().startswith("title:"):
+                    lines = lines[1:]
+                
+                for line in lines:
                     line = line.strip()
                     if not line:
                         continue  # Skip empty lines
 
                     parts = [p.strip() for p in line.split(":")]
 
-                    if len(parts) != 4:
+                    # Expected: title:year:minutes:genres:system_name:director:cast:synopsis
+                    if len(parts) < 5:
                         print(f"Warning: Line skipped (invalid format): {line}")
                         continue
 
-                    title, minutes, genres, system_name = parts
+                    title = parts[0]
+                    year = parts[1]
+                    minutes = parts[2]
+                    genres = parts[3]
+                    system_name = parts[4]
+                    director = parts[5] if len(parts) > 5 else ""
+                    cast = parts[6] if len(parts) > 6 else ""
+                    synopsis = parts[7] if len(parts) > 7 else ""
+                    
                     genre_list = [g.strip() for g in genres.split(",")]
 
-                    movie = Movie(title, minutes, genre_list, system_name)
+                    movie = Movie(title, year, minutes, genre_list, system_name, 
+                                director, cast, synopsis)
                     self.movies.append(movie)
                     
             print(f"Success: {len(self.movies)} movie(s) loaded from {self.path}")
@@ -180,4 +197,3 @@ class Catalog:
     def __repr__(self):
         """Text representation of the catalog."""
         return f"<Catalog path='{self.path}' movies={len(self.movies)}>"
-    
