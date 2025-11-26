@@ -1,19 +1,18 @@
 import sys
 from unittest import case
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QMenu
-from PyQt6.QtCore import QTimer, QUrl
+from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QPixmap, QAction
-from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from ui.main_window import Ui_MainWindow
 from controllers.movie_controller import MovieController
 from genre_row import GenreRow
-from models import Catalogue, Film
+from models import Catalog
 from card import createFilmCard
 import os
 from user_manager.user import UserManager
 from user_manager.user_dialogs import show_login_dialog, confirm_logout, show_genre_preferences_dialog
-from player.player import player
+from player.player import Player
 
 class MainApp(QMainWindow, Ui_MainWindow):
     """
@@ -270,10 +269,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
         
         # Create a vertical container for all genre rows
         row = 0
-        for genre, films in grouped_movies.items():
-            if films:  # Only if the genre has movies
+        for genre, movies in grouped_movies.items():
+            if movies:  # Only if the genre has movies
                 # Create a genre row with horizontal scroll
-                genre_row = GenreRow(genre, films, self.user_manager)
+                genre_row = GenreRow(genre, movies, self.user_manager)
                 layout.addWidget(genre_row, row, 0, 1, max_col)  # Takes full width (dynamic)
                 
                 # Register all cards from this row and connect their signals
@@ -359,7 +358,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         user = self.user_manager.current_user
         
         # Request recommendations for the user from the controller
-        recommendations = self.controller.get_recommanded_movies(user)
+        recommendations = self.controller.get_recommended_movies(user)
         
         # Update the display (UI logic)
         self.current_view = "recommendation"
@@ -406,7 +405,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
             return
         
         # Get the list of all genres from the catalogue
-        all_genres = self.catalogue.getAllTheGenres()
+        all_genres = self.catalogue.get_all_genres()
         
         # Display the dialog
         show_genre_preferences_dialog(self.user_manager, all_genres, self)
@@ -478,7 +477,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
             
 if __name__ == "__main__":
 
-    catalog = Catalogue()
+    catalog = Catalog()
     catalog.load_from_csv()
 
     app = QApplication(sys.argv)

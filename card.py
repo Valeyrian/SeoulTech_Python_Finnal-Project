@@ -14,22 +14,22 @@ class FilmCard(QFrame):
     Netflix style: horizontal rectangular format with like and play buttons.
     """
     
-    # Signal emitted when the like status changes (film_id, is_liked)
+    # Signal emitted when the like status changes (movie_id, is_liked)
     like_changed = pyqtSignal(str, bool)
     # Signal emitted when the play button is clicked
     play_clicked = pyqtSignal(object)
     
-    def __init__(self, film, user_manager=None, parent=None):
+    def __init__(self, movie, user_manager=None, parent=None):
         """
         Initialize a movie card.
         
         Args:
-            film: Film instance to display
+            movie: Movie instance to display
             user_manager: User manager (optional)
             parent: Parent widget (optional)
         """
         super().__init__(parent)
-        self.film = film
+        self.movie = movie
         self.user_manager = user_manager
         
         # Widget configuration
@@ -69,10 +69,10 @@ class FilmCard(QFrame):
         image_layout.setSpacing(0)
 
         # Load the image
-        if not os.path.exists(self.film.tiles):
+        if not os.path.exists(self.movie.tile_path):
             pixmap = QPixmap("./assets/image_not_found.jpeg")
         else:
-            pixmap = QPixmap(self.film.tiles)
+            pixmap = QPixmap(self.movie.tile_path)
 
         image_label = QLabel()
         image_label.setPixmap(
@@ -114,7 +114,7 @@ class FilmCard(QFrame):
         text_layout.setSpacing(4)
 
         # Title with ellipsis
-        title_label = QLabel(self.film.titre)
+        title_label = QLabel(self.movie.title)
         title_label.setWordWrap(False)
         title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         title_label.setObjectName("movieTitle")
@@ -122,16 +122,16 @@ class FilmCard(QFrame):
         
         # Apply ellipsis
         metrics = QFontMetrics(title_label.font())
-        elided_text = metrics.elidedText(self.film.titre, Qt.TextElideMode.ElideRight, 220)
+        elided_text = metrics.elidedText(self.movie.title, Qt.TextElideMode.ElideRight, 220)
         title_label.setText(elided_text)
         text_layout.addWidget(title_label)
 
         # Genre and duration
-        genre_text = ', '.join(self.film.genres[:2])
-        if len(self.film.genres) > 2:
+        genre_text = ', '.join(self.movie.genres[:2])
+        if len(self.movie.genres) > 2:
             genre_text += '...'
         
-        genre_duration_label = QLabel(f"{genre_text} • {self.film.minute}m")
+        genre_duration_label = QLabel(f"{genre_text} • {self.movie.minutes}m")
         genre_duration_label.setObjectName("genreDurationLabel")
         genre_duration_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         text_layout.addWidget(genre_duration_label)
@@ -143,7 +143,7 @@ class FilmCard(QFrame):
         # Like button (heart)
         self.like_button = QPushButton("♡")
         self.like_button.setObjectName("likeButton")
-        self.like_button.setProperty("film_id", self.film.system_name)
+        self.like_button.setProperty("movie_id", self.movie.system_name)
         self.like_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.like_button.setMinimumSize(32, 28)
         self.like_button.setMaximumSize(32, 28)
@@ -170,7 +170,7 @@ class FilmCard(QFrame):
     def update_like_button_state(self):
         """Update the like button appearance based on state."""
         if self.user_manager and self.user_manager.current_user:
-            is_liked = self.user_manager.current_user.is_favorite(self.film.system_name)
+            is_liked = self.user_manager.current_user.is_favorite(self.movie.system_name)
             self.like_button.setText("♥" if is_liked else "♡")
             self.like_button.setProperty("liked", is_liked)
         else:
@@ -195,14 +195,14 @@ class FilmCard(QFrame):
         user = self.user_manager.current_user
         
         # Toggle favorite status
-        if user.is_favorite(self.film.system_name):
-            user.remove_favorite(self.film.system_name)
+        if user.is_favorite(self.movie.system_name):
+            user.remove_favorite(self.movie.system_name)
             is_now_liked = False
-            print(f"Removed '{self.film.titre}' from {user.username}'s favorites")
+            print(f"Removed '{self.movie.title}' from {user.username}'s favorites")
         else:
-            user.add_favorite(self.film.system_name)
+            user.add_favorite(self.movie.system_name)
             is_now_liked = True
-            print(f"Added '{self.film.titre}' to {user.username}'s favorites")
+            print(f"Added '{self.movie.title}' to {user.username}'s favorites")
         
         # Save changes
         self.user_manager.save_users()
@@ -211,43 +211,42 @@ class FilmCard(QFrame):
         self.update_like_button_state()
         
         # Emit signal to synchronize other cards
-        self.like_changed.emit(self.film.system_name, is_now_liked)
+        self.like_changed.emit(self.movie.system_name, is_now_liked)
      
     def on_play_clicked(self):
         """Handler for the play button click."""
-        print(f"Playing: {self.film.titre}")
-        self.play_clicked.emit(self.film)
+        print(f"Playing: {self.movie.title}")
+        self.play_clicked.emit(self.movie)
     
-    def sync_like_state(self, film_id, is_liked):
+    def sync_like_state(self, movie_id, is_liked):
         """
         Synchronize like state with other cards.
         
         Args:
-            film_id: Movie identifier
+            movie_id: Movie identifier
             is_liked: New like state
         """
-        if self.film.system_name == film_id:
+        if self.movie.system_name == movie_id:
             self.update_like_button_state()
 
 
-def createFilmCard(film, user_manager=None):
+def createFilmCard(movie, user_manager=None):
     """
-    Legacy function for compatibility with existing code.
     Creates and returns a FilmCard instance.
     
     Args:
-        film: Film instance
+        movie: Movie instance
         user_manager: User manager (optional)
     
     Returns:
         FilmCard: Movie card instance
     """
-    return FilmCard(film, user_manager)
+    return FilmCard(movie, user_manager)
 
 
 def deleteFilmCard(card):
     """
-    Legacy function to delete a card.
+    Function to delete a card.
     
     Args:
         card: FilmCard instance to delete

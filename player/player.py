@@ -2,7 +2,7 @@
 Media player module for the Netflux application.
 Handles video playback functionality.
 """
-from PyQt6.QtWidgets import QFrame, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QFrame
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtCore import QUrl
@@ -51,8 +51,4 @@ class Player(QFrame):
         self.media_player.setSource(path)
         self.media_player.play()
 
-
-# Legacy class name and method for backwards compatibility
-player = Player
-Player.startMediaPlayer = Player.start_media_player
 

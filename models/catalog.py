@@ -181,21 +181,3 @@ class Catalog:
         """Text representation of the catalog."""
         return f"<Catalog path='{self.path}' movies={len(self.movies)}>"
     
-    # Legacy method names for backwards compatibility
-    loadFromCSV = load_from_csv
-    printFilms = print_movies
-    getFilmsByGenre = get_movies_by_genre
-    getFilmsFromMultipleGenres = get_movies_from_multiple_genres
-    getFilmsByTitle = get_movies_by_title
-    getFilmBySystemName = get_movie_by_system_name
-    getAllTheGenres = get_all_genres
-    getAllCatalogue = get_all_catalog
-    
-    @property
-    def films(self):
-        """Legacy property for accessing movies list."""
-        return self.movies
-
-
-# Legacy class name for backwards compatibility
-Catalogue = Catalog

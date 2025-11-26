@@ -133,7 +133,7 @@ class MovieController:
         """
         return len(self.catalog.movies)
 
-    def get_recommanded_movies(self, user):
+    def get_recommended_movies(self, user):
         """
         Return a list of recommended movies based on the user's preferred genres.
         
@@ -177,5 +177,4 @@ class MovieController:
         
         return favorite_movies
     
-    # Legacy method names for backwards compatibility
-    get_recommended_movies = get_recommanded_movies
+ 

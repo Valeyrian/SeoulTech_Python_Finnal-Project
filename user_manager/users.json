@@ -32,6 +32,18 @@
       "watchlist": [],
       "watched": [],
       "likedGenres": []
+    },
+    {
+      "user_id": 1764141261412,
+      "username": "pierrre",
+      "favorites": [
+        "pirates_des_caraibes"
+      ],
+      "watchlist": [],
+      "watched": [],
+      "likedGenres": [
+        "Science-Fiction"
+      ]
     }
   ],
   "current_user_id": 1762675974369

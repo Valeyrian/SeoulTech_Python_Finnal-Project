@@ -38,9 +38,6 @@ class User:
         self.watched: List[str] = []
         self.liked_genres: List[str] = []
         
-        # Legacy attribute name for backwards compatibility
-        self.likedGenre = self.liked_genres
-        
     
     def _generate_id(self) -> int:
         """
