@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                             QCheckBox, QScrollArea, QWidget, QGridLayout)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
-from user_manager.user import User, UserManager
+from user_manager.user import UserManager
 
 
 class LoginDialog(QDialog):
@@ -213,14 +213,16 @@ class GenrePreferencesDialog(QDialog):
             checkbox.setMinimumHeight(30)
             
             # Check if the genre is already in user preferences
-            if self.user and genre in self.user.likedGenre:
+            if self.user and hasattr(self.user, 'liked_genres') and genre in self.user.liked_genres:
+                checkbox.setChecked(True)
+            elif self.user and hasattr(self.user, 'likedGenre') and genre in self.user.likedGenre:
                 checkbox.setChecked(True)
             
             self.checkboxes[genre] = checkbox
             genres_layout.addWidget(checkbox, row, col)
             
             col += 1
-            if col >= 2:  # 2 columns
+            if col >= 2:
                 col = 0
                 row += 1
         
@@ -263,8 +265,11 @@ class GenrePreferencesDialog(QDialog):
             if checkbox.isChecked():
                 selected_genres.append(genre)
         
-        # Save in user
-        self.user.likedGenre = selected_genres
+        # Save in user (support both attribute names)
+        if hasattr(self.user, 'liked_genres'):
+            self.user.liked_genres = selected_genres
+        if hasattr(self.user, 'likedGenre'):
+            self.user.likedGenre = selected_genres
         
         # Save to file
         self.user_manager.save_users()

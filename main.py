@@ -1,19 +1,18 @@
 import sys
 from unittest import case
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QMenu
-from PyQt6.QtCore import QTimer, QUrl
+from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QPixmap, QAction
-from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from ui.main_window import Ui_MainWindow
 from controllers.movie_controller import MovieController
 from genre_row import GenreRow
-from models import Catalogue, Film
+from models import Catalog
 from card import createFilmCard
 import os
 from user_manager.user import UserManager
 from user_manager.user_dialogs import show_login_dialog, confirm_logout, show_genre_preferences_dialog
-from player.player import player
+from player.player import Player
 
 class MainApp(QMainWindow, Ui_MainWindow):
     """
@@ -48,7 +47,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         # Initialize the controller (business logic layer)
         self.controller = MovieController(catalogue)
         
-        self.current_view = "acceuil"
+        self.current_view = "home"
         self.current_view_mode = "genre"
        
         self.show_movie_list_by_genre()  # Genre view with horizontal scroll
@@ -88,7 +87,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
             user = self.user_manager.current_user
             
             # Display the username (clickable to view profile)
-            profile_action = QAction(f"👤 {user.username}", self)
+            profile_action = QAction(f"{user.username}", self)
             profile_action.setEnabled(False)
             account_menu.addAction(profile_action)
             
@@ -270,10 +269,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
         
         # Create a vertical container for all genre rows
         row = 0
-        for genre, films in grouped_movies.items():
-            if films:  # Only if the genre has movies
+        for genre, movies in grouped_movies.items():
+            if movies:  # Only if the genre has movies
                 # Create a genre row with horizontal scroll
-                genre_row = GenreRow(genre, films, self.user_manager)
+                genre_row = GenreRow(genre, movies, self.user_manager)
                 layout.addWidget(genre_row, row, 0, 1, max_col)  # Takes full width (dynamic)
                 
                 # Register all cards from this row and connect their signals
@@ -343,7 +342,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         all_movies = self.controller.get_all_movies()
         
         # Update the display
-        self.current_view = "acceuil"
+        self.current_view = "home"
         self.current_view_mode = "genre"
         self.show_movies(all_movies)
         
@@ -359,10 +358,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
         user = self.user_manager.current_user
         
         # Request recommendations for the user from the controller
-        recommendations = self.controller.get_recommanded_movies(user)
+        recommendations = self.controller.get_recommended_movies(user)
         
         # Update the display (UI logic)
-        self.current_view = "recommandation"
+        self.current_view = "recommendation"
         self.current_view_mode = "genre"
         self.show_movies(recommendations)
     
@@ -406,7 +405,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
             return
         
         # Get the list of all genres from the catalogue
-        all_genres = self.catalogue.getAllTheGenres()
+        all_genres = self.catalogue.get_all_genres()
         
         # Display the dialog
         show_genre_preferences_dialog(self.user_manager, all_genres, self)
@@ -446,42 +445,40 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.show_movies(favorites)
 
     def _reload_favorites_view(self):
-            """
-            Fully reload the favorites view (called with delay).
-            """
-            user = self.user_manager.current_user
-            if not user:
-                return
+        """
+        Fully reload the favorites view (called with delay).
+        """
+        user = self.user_manager.current_user
+        if not user:
+            return
 
-            print(f"[RELOAD] Reloading favorites view for {user.username}")
-        
-            favorites = self.controller.get_favorite_movies(user)
+        print(f"Reloading favorites view for {user.username}")
+    
+        favorites = self.controller.get_favorite_movies(user)
 
-            if not favorites:
-                print("No favorites to display")
-                self._clear_layout(self.gridLayout)
-            else:
-                self.show_movies(favorites)
+        if not favorites:
+            print("No favorites to display")
+            self._clear_layout(self.gridLayout)
+        else:
+            self.show_movies(favorites)
 
     def on_watchlist_clicked(self):
-            """
-            Handler to display the watchlist.
-            """
-            if not self.user_manager.current_user:
-                print("⚠️  Please log in to see your list")
-                return
-            
-            user = self.user_manager.current_user
-            print(f"📋 List of {user.username}: {user.watchlist}")
-            # TODO: Filter and display movies from the watchlist
+        """
+        Handler to display the watchlist.
+        """
+        if not self.user_manager.current_user:
+            print("Warning: Please log in to see your list")
+            return
+        
+        user = self.user_manager.current_user
+        print(f"Watch list of {user.username}: {user.watchlist}")
 
         
             
 if __name__ == "__main__":
 
-    katalogue = Catalogue()
-    katalogue.loadFromCSV()
-   # katalogue.printFilms()
+    catalog = Catalog()
+    catalog.load_from_csv()
 
     app = QApplication(sys.argv)
     
@@ -490,11 +487,11 @@ if __name__ == "__main__":
     if os.path.exists(style_path):
         with open(style_path, "r", encoding="utf-8") as f:
             app.setStyleSheet(f.read())
-        print(" Netflux stylesheet loaded")
+        print("Netflux stylesheet loaded")
     else:
-        print(f"  Stylesheet not found: {style_path}")
+        print(f"Error: Stylesheet not found: {style_path}")
         raise FileNotFoundError(f"The style file '{style_path}' is missing. Please make sure it exists.")
     
-    window = MainApp(katalogue)
+    window = MainApp(catalog)
     window.show()
     sys.exit(app.exec())

@@ -2,7 +2,7 @@
 Models package for the Netflux application.
 Contains data classes and models.
 """
-from .film import Film
-from .catalogue import Catalogue
+from .movie import Movie
+from .catalog import Catalog
 
-__all__ = ['Film', 'Catalogue']
+__all__ = ['Movie', 'Catalog']

@@ -1,29 +1,29 @@
 """
-Catalogue model for managing the movie collection.
+Catalog model for managing the movie collection.
 """
-from .film import Film
+from .movie import Movie
 
 
-class Catalogue:
+class Catalog:
     """
     Manages the movie collection and provides search/filtering methods.
     
     Attributes:
         path (str): Path to the CSV file
-        films (list[Film]): List of loaded movies
+        movies (list[Movie]): List of loaded movies
     """
     
     def __init__(self, path="./data/catalogue.csv"):
         """
-        Initialize the catalogue.
+        Initialize the catalog.
         
         Args:
             path (str): Path to the movies CSV file
         """
         self.path = path
-        self.films = []
+        self.movies = []
     
-    def loadFromCSV(self):
+    def load_from_csv(self):
         """
         Load movies from the CSV file.
         Expected format: title:minutes:genres:system_name
@@ -43,29 +43,29 @@ class Catalogue:
                     parts = [p.strip() for p in line.split(":")]
 
                     if len(parts) != 4:
-                        print(f"⚠️  Line skipped (invalid format): {line}")
+                        print(f"Warning: Line skipped (invalid format): {line}")
                         continue
 
-                    titre, minute, genres, system_name = parts
+                    title, minutes, genres, system_name = parts
                     genre_list = [g.strip() for g in genres.split(",")]
 
-                    film = Film(titre, minute, genre_list, system_name)
-                    self.films.append(film)
+                    movie = Movie(title, minutes, genre_list, system_name)
+                    self.movies.append(movie)
                     
-            print(f" {len(self.films)} movie(s) loaded from {self.path}")
+            print(f"Success: {len(self.movies)} movie(s) loaded from {self.path}")
         except FileNotFoundError:
-            print(f" File not found: {self.path}")
+            print(f"Error: File not found: {self.path}")
             raise
         except Exception as e:
-            print(f" Error loading the catalogue: {e}")
+            print(f"Error: Failed to load the catalog: {e}")
             raise
     
-    def printFilms(self):
+    def print_movies(self):
         """Display all movies in the console."""
-        for film in self.films:
-            print(film)
+        for movie in self.movies:
+            print(movie)
     
-    def getFilmsByGenre(self, genre):
+    def get_movies_by_genre(self, genre):
         """
         Get all movies of a given genre.
         
@@ -73,15 +73,15 @@ class Catalogue:
             genre (str): Genre to search for
             
         Returns:
-            list[Film]: List of matching movies
+            list[Movie]: List of matching movies
         """
         results = []
-        for film in self.films:
-            if genre in film.genres:
-                results.append(film)
+        for movie in self.movies:
+            if genre in movie.genres:
+                results.append(movie)
         return results
     
-    def getFilmsFromMultipleGenres(self, genres_list):
+    def get_movies_from_multiple_genres(self, genres_list):
         """
         Get movies belonging to at least one of the genres in the list.
         
@@ -89,18 +89,18 @@ class Catalogue:
             genres_list (list[str]): List of genres to search for
             
         Returns:
-            list[Film]: Movies matching at least one genre
+            list[Movie]: Movies matching at least one genre
         """
         if not genres_list:
             return []
             
         results = []
-        for film in self.films:
-            if any(genre in film.genres for genre in genres_list):
-                results.append(film)
+        for movie in self.movies:
+            if any(genre in movie.genres for genre in genres_list):
+                results.append(movie)
         return results
     
-    def getFilmsByTitle(self, keywords):
+    def get_movies_by_title(self, keywords):
         """
         Search for movies by keywords in the title.
         
@@ -108,7 +108,7 @@ class Catalogue:
             keywords (str): Keywords separated by spaces
             
         Returns:
-            list[Film]: Movies whose title contains at least one keyword
+            list[Movie]: Movies whose title contains at least one keyword
         """
         if not keywords:
             return []
@@ -116,14 +116,14 @@ class Catalogue:
         words = keywords.lower().split()
         results = []
 
-        for film in self.films:
-            title = film.titre.lower()
-            if any(word in title for word in words):
-                results.append(film)
+        for movie in self.movies:
+            title_lower = movie.title.lower()
+            if any(word in title_lower for word in words):
+                results.append(movie)
 
         return results
     
-    def getFilmBySystemName(self, system_name):
+    def get_movie_by_system_name(self, system_name):
         """
         Get a movie by its system identifier.
         
@@ -131,52 +131,53 @@ class Catalogue:
             system_name (str): System identifier of the movie
             
         Returns:
-            Film|None: The found movie or None
+            Movie|None: The found movie or None
         """
-        for film in self.films:
-            if film.system_name == system_name:
-                return film
+        for movie in self.movies:
+            if movie.system_name == system_name:
+                return movie
         return None
     
-    def getAllTheGenres(self):
+    def get_all_genres(self):
         """
-        Get all unique genres from the catalogue.
+        Get all unique genres from the catalog.
         
         Returns:
             list[str]: Sorted list of genres
         """
         genres = set()
-        for film in self.films:
-            for genre in film.genres:
+        for movie in self.movies:
+            for genre in movie.genres:
                 genres.add(genre)
         return sorted(genres)
     
-    def getAllCatalogue(self):
+    def get_all_catalog(self):
         """
-        Get all movies from the catalogue.
+        Get all movies from the catalog.
         
         Returns:
-            list[Film]: Complete list of movies
+            list[Movie]: Complete list of movies
         """
-        return self.films
+        return self.movies
     
-    def get_film_count(self):
+    def get_movie_count(self):
         """
-        Return the number of movies in the catalogue.
+        Return the number of movies in the catalog.
         
         Returns:
             int: Number of movies
         """
-        return len(self.films)
+        return len(self.movies)
     
     def __len__(self):
-        """Allow using len(catalogue)."""
-        return len(self.films)
+        """Allow using len(catalog)."""
+        return len(self.movies)
     
     def __iter__(self):
-        """Allow iterating over movies: for film in catalogue."""
-        return iter(self.films)
+        """Allow iterating over movies: for movie in catalog."""
+        return iter(self.movies)
     
     def __repr__(self):
-        """Text representation of the catalogue."""
-        return f"<Catalogue path='{self.path}' films={len(self.films)}>"
+        """Text representation of the catalog."""
+        return f"<Catalog path='{self.path}' movies={len(self.movies)}>"
+    
