@@ -143,18 +143,15 @@ class MovieController:
         Returns:
             list: Movies matching the user's preferred genres
         """
-        if not user or not hasattr(user, 'liked_genres'):
-            if user and hasattr(user, 'likedGenre'):
-                liked_genres = user.likedGenre
-            else:
-                return []
-        else:
-            liked_genres = user.liked_genres
-            
-        if not liked_genres:
+        if not user:
+            print("No user provided for recommendations.")
             return []
         
-        return self.catalog.get_movies_from_multiple_genres(liked_genres)
+        if not hasattr(user, 'liked_genres') or not user.liked_genres:
+            print("User has no liked genres for recommendations.")
+            return []
+        
+        return self.catalog.get_movies_from_multiple_genres(user.liked_genres)
     
     def get_favorite_movies(self, user):
         """
@@ -177,4 +174,45 @@ class MovieController:
         
         return favorite_movies
     
+    def get_wathclist_movie(self, user):
+        """
+        Return a list of the user's watchlist movies.
+        
+        Args:
+            user: User instance containing watchlist movies
+        
+        Returns:
+            list: User's watchlist movies
+        """
+        if not user or not user.watchlist:
+            return []
+        
+        watchlist_movies = []
+        for movie_id in user.watchlist:
+            movie = self.catalog.get_movie_by_system_name(movie_id)
+            if movie:
+                watchlist_movies.append(movie)
+        
+        return watchlist_movies
+
+    def get_watched_movie(self, user):
+        """
+        Return a list of the user's watched movies.
+        
+        Args:
+            user: User instance containing watched movies
+        
+        Returns:
+            list: User's watched movies
+        """
+        if not user or not user.watched:
+            return []
+        
+        watched_movies = []
+        for movie_id in user.watched:
+            movie = self.catalog.get_movie_by_system_name(movie_id)
+            if movie:
+                watched_movies.append(movie)
+        
+        return watched_movies
  

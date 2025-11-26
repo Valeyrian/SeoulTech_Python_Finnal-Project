@@ -3,7 +3,8 @@ Widget for displaying a row of movies by genre with horizontal scrolling.
 """
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QFrame
 from PyQt6.QtCore import Qt
-from card import createFilmCard
+
+from .card import createFilmCard
 
 
 class GenreRow(QWidget):
