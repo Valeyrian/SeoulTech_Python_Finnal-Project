@@ -43,8 +43,7 @@ class Movie:
         self.cast = cast
         self.synopsis = synopsis
         self.tile_path = f"./data/movies_tiles/{system_name}.jpg"
-        self.video_path = f"./data/movies/{system_name}.mp4"
-        
+        self.video_path = f"./data/movies/{system_name}.mp4"     
     
     def __repr__(self):
         """Text representation of the movie."""

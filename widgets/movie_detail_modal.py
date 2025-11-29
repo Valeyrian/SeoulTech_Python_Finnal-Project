@@ -5,7 +5,7 @@ Displays a large overlay with movie details, trailer, and actions.
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QFrame, QLabel, QVBoxLayout, QPushButton, QHBoxLayout, QTextEdit)
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt, pyqtSignal, QUrl
-from PyQt6.QtMultimedia import QMediaPlayer
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 import os
 
@@ -40,7 +40,7 @@ class MovieDetailModal(QMainWindow):
         # Set size proportional to parent window (80%)
         if parent:
             parent_size = parent.size()
-            window_width = int(parent_size.width() * 0.8)
+            window_width = 900
             window_height = int(parent_size.height() * 0.8)
             self.resize(window_width, window_height)
             
@@ -51,13 +51,18 @@ class MovieDetailModal(QMainWindow):
                      center_point.y() - self.height() // 2)
         else:
             # Default size if no parent
-            self.resize(1100, 800)
+            self.resize(900, 800)
         
         # Set minimum size to prevent too small window
         self.setMinimumSize(900, 700)
         
+        # Audio output for sound
+        self.audio_output = QAudioOutput()
+        self.audio_output.setVolume(0.5)  # Set volume to 50%
+        
         # Media player for trailer
         self.media_player = QMediaPlayer()
+        self.media_player.setAudioOutput(self.audio_output)
         
         # Configure looping: restart video when it ends
         self.media_player.mediaStatusChanged.connect(self.on_media_status_changed)
@@ -116,8 +121,8 @@ class MovieDetailModal(QMainWindow):
         info_container = QFrame()
         info_container.setObjectName("infoSection")
         info_layout = QVBoxLayout(info_container)
-        info_layout.setContentsMargins(30, 25, 30, 15)  # Réduit de 20 à 15
-        info_layout.setSpacing(8)  # Réduit de 12 à 8
+        info_layout.setContentsMargins(30, 25, 30, 15)
+        info_layout.setSpacing(8)
         
         # Title and year
         title_layout = QHBoxLayout()
@@ -306,17 +311,38 @@ class MovieDetailModal(QMainWindow):
         user = self.user_manager.current_user
         is_watched = not user.is_watched(self.movie.system_name)
         
+        # Track if watchlist state changed
+        was_in_watchlist = user.is_in_watchlist(self.movie.system_name)
+        
         if is_watched:
+            # Mark as watched
             user.mark_as_watched(self.movie.system_name)
+            
+            # If marking as watched and in watchlist, remove from watchlist
+            if was_in_watchlist:
+                user.remove_from_watchlist(self.movie.system_name)
+                print(f"Automatically removed '{self.movie.title}' from watchlist")
+                
+                # Force update of watchlist button
+                self.update_watchlist_button()
+                
+                # Emit watchlist changed signal
+                self.watchlist_changed.emit(self.movie.system_name, False)
         else:
+            # Unmark as watched
             user.unmark_as_watched(self.movie.system_name)
         
+        # Save changes
         self.user_manager.save_users()
+        
+        # Update watched button
         self.update_watched_button()
+        
+        # Emit watched changed signal
         self.watched_changed.emit(self.movie.system_name, is_watched)
     
     def load_trailer(self):
-        """Load and play the movie trailer."""
+        """Load and play the movie trailer with sound."""
         trailer_path = self.movie.video_path
         
         # Check if the trailer exists, otherwise use fallback video
@@ -325,13 +351,26 @@ class MovieDetailModal(QMainWindow):
             self.media_player.play()
         else:
             # Use fallback video for missing trailers
-            fallback_path = "./data/movies_videos/video_not_found.mp4"
+            fallback_path = "./assets/video_not_found.mp4"
             if os.path.exists(fallback_path):
                 self.media_player.setSource(QUrl.fromLocalFile(os.path.abspath(fallback_path)))
                 self.media_player.play()
                 print(f"No trailer available for {self.movie.title}, using fallback video")
             else:
                 print("Fallback video not found. Cannot play trailer.")
+    
+    def set_volume(self, volume):
+        """
+        Set the audio volume.
+        
+        Args:
+            volume (float): Volume level between 0.0 (mute) and 1.0 (max)
+        """
+        self.audio_output.setVolume(max(0.0, min(1.0, volume)))
+    
+    def toggle_mute(self):
+        """Toggle audio mute."""
+        self.audio_output.setMuted(not self.audio_output.isMuted())
     
     def on_media_status_changed(self, status):
         """Handle media status changes to implement looping."""
@@ -351,3 +390,25 @@ class MovieDetailModal(QMainWindow):
         """Override closeEvent to stop media playback."""
         self.media_player.stop()
         super().closeEvent(event)
+    
+    def sync_watchlist_state(self, movie_id, is_in_watchlist):
+        """
+        Synchronize watchlist button state when changed from elsewhere.
+        
+        Args:
+            movie_id: Movie identifier
+            is_in_watchlist: New watchlist state
+        """
+        if self.movie.system_name == movie_id:
+            self.update_watchlist_button()
+
+    def sync_watched_state(self, movie_id, is_watched):
+        """
+        Synchronize watched button state when changed from elsewhere.
+        
+        Args:
+            movie_id: Movie identifier
+            is_watched: New watched state
+        """
+        if self.movie.system_name == movie_id:
+            self.update_watched_button()

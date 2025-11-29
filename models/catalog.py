@@ -3,7 +3,6 @@ Catalog model for managing the movie collection.
 """
 from .movie import Movie
 
-
 class Catalog:
     """
     Manages the movie collection and provides search/filtering methods.
@@ -197,3 +196,29 @@ class Catalog:
     def __repr__(self):
         """Text representation of the catalog."""
         return f"<Catalog path='{self.path}' movies={len(self.movies)}>"
+
+    def get_movies_by_title_or_director(self, keywords):
+        """
+        Search for movies by keywords in the title or director.
+        
+        Args:
+            keywords (str): Keywords separated by spaces
+            
+        Returns:
+            list[Movie]: Movies whose title or director contains at least one keyword
+        """
+        if not keywords:
+            return []
+            
+        words = keywords.lower().split()
+        results = []
+
+        for movie in self.movies:
+            title_lower = movie.title.lower()
+            director_lower = movie.director.lower() if movie.director else ""
+            
+            # Check if any keyword matches in title or director
+            if any(word in title_lower or word in director_lower for word in words):
+                results.append(movie)
+
+        return results

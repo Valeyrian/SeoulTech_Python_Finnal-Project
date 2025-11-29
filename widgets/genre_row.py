@@ -3,9 +3,9 @@ Widget for displaying a row of movies by genre with horizontal scrolling.
 """
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QFrame
 from PyQt6.QtCore import Qt
+import random
 
 from .card import createFilmCard
-
 
 class GenreRow(QWidget):
     """
@@ -76,8 +76,12 @@ class GenreRow(QWidget):
         cards_layout.setSpacing(12)
         cards_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
+        # Shuffle movies for variety in display order
+        shuffled_movies = self.movies.copy()
+        random.shuffle(shuffled_movies)
+        
         # Add movie cards
-        for movie in self.movies:
+        for movie in shuffled_movies:
             card_widget = createFilmCard(movie, self.user_manager)
             self.cards.append(card_widget)
             cards_layout.addWidget(card_widget)

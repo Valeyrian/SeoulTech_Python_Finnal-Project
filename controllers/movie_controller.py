@@ -42,7 +42,7 @@ class MovieController:
     
     def search_movies(self, query):
         """
-        Search for movies by title.
+        Search for movies by title and director.
         
         Args:
             query (str): Search text (keywords)
@@ -55,20 +55,8 @@ class MovieController:
         if not self._current_search:
             return self.get_all_movies()
         
-        return self.catalog.get_movies_by_title(self._current_search)
-    
-    def filter_by_genre(self, genre):
-        """
-        Filter movies by genre.
-        
-        Args:
-            genre (str): Genre to filter (e.g., "Action", "Comedy")
-        
-        Returns:
-            list: Movies of the specified genre
-        """
-        self._current_filter = genre
-        return self.catalog.get_movies_by_genre(genre)
+        # Use the new method that searches in both title and director
+        return self.catalog.get_movies_by_title_or_director(self._current_search)
     
     def get_available_genres(self):
         """
@@ -104,26 +92,6 @@ class MovieController:
         
         return grouped
     
-    def get_current_view(self):
-        """
-        Return the movies to display based on the active filter/search.
-        
-        Returns:
-            list: Movies matching the current state
-        """
-        if self._current_search:
-            return self.search_movies(self._current_search)
-        elif self._current_filter:
-            return self.filter_by_genre(self._current_filter)
-        else:
-            return self.get_all_movies()
-    
-    def reset_filters(self):
-        """Reset all filters and searches."""
-        self._current_filter = None
-        self._current_search = ""
-        return self.get_all_movies()
-    
     def get_movie_count(self):
         """
         Return the total number of movies in the catalog.
@@ -133,25 +101,74 @@ class MovieController:
         """
         return len(self.catalog.movies)
 
-    def get_recommended_movies(self, user):
+    def _get_favorite_directors(self, user):
         """
-        Return a list of recommended movies based on the user's preferred genres.
+        Extract unique directors from user's favorite movies.
         
         Args:
-            user: User instance containing genre preferences
+            user: User instance containing favorite movies
         
         Returns:
-            list: Movies matching the user's preferred genres
+            set: Set of director names from favorite movies
+        """
+        favorite_directors = set()
+        
+        if not hasattr(user, 'favorites') or not user.favorites:
+            return favorite_directors
+        
+        for movie_id in user.favorites:
+            movie = self.catalog.get_movie_by_system_name(movie_id)
+            if movie and hasattr(movie, 'director') and movie.director:
+                directors = [d.strip() for d in movie.director.split(',')]
+                favorite_directors.update(directors)
+        
+        return favorite_directors
+
+    def get_recommended_movies(self, user):
+        """
+        Return a list of recommended movies based on the user's preferred genres and favorite directors.
+        Excludes movies already watched by the user.
+        
+        Args:
+            user: User instance containing genre preferences, favorites, and watched list
+        
+        Returns:
+            list: Movies matching the user's preferred genres and favorite directors,
+                  excluding already watched movies
         """
         if not user:
             print("No user provided for recommendations.")
             return []
         
-        if not hasattr(user, 'liked_genres') or not user.liked_genres:
-            print("User has no liked genres for recommendations.")
+        if not hasattr(user, 'liked_genres') and not user.liked_genres and not hasattr(user, 'favorites') and not user.favorites :
+            print("User has no liked genres and no favorites films so no recommendation posible")
             return []
         
-        return self.catalog.get_movies_from_multiple_genres(user.liked_genres)
+        # Get movies based on liked genres
+        recommended_movies = self.catalog.get_movies_from_multiple_genres(user.liked_genres)
+        
+        # Get directors from favorite movies using the helper function
+        favorite_directors = self._get_favorite_directors(user)
+        
+        # Add movies from favorite directors
+        if favorite_directors:
+            all_movies = self.catalog.get_all_catalog()
+            for movie in all_movies:
+                if movie not in recommended_movies and hasattr(movie, 'director') and movie.director:
+                    movie_directors = [d.strip() for d in movie.director.split(',')]
+                    # Check if any director matches
+                    if any(director in favorite_directors for director in movie_directors):
+                        recommended_movies.append(movie)
+        
+        # Exclude watched movies
+        if hasattr(user, 'watched') and user.watched:
+            watched_set = set(user.watched)
+            recommended_movies = [
+                movie for movie in recommended_movies 
+                if movie.system_name not in watched_set
+            ]
+        
+        return recommended_movies
     
     def get_favorite_movies(self, user):
         """
@@ -215,4 +232,3 @@ class MovieController:
                 watched_movies.append(movie)
         
         return watched_movies
- 
