@@ -37,7 +37,6 @@ class User:
         self.watchlist: List[str] = []
         self.watched: List[str] = []
         self.liked_genres: List[str] = []
-        
     
     def _generate_id(self) -> int:
         """
@@ -49,6 +48,7 @@ class User:
         import time
         return int(time.time() * 1000)
     
+    # Favorite Movies Methods
     def add_favorite(self, film_code: str) -> bool:
         """
         Add a movie to favorites.
@@ -100,6 +100,7 @@ class User:
         """
         return self.favorites
     
+    # Watchlist Methods
     def add_to_watchlist(self, film_code: str) -> bool:
         """
         Add a movie to the watchlist.
@@ -151,6 +152,7 @@ class User:
         """
         return self.watchlist
     
+    # Watched Movies Methods
     def mark_as_watched(self, film_code: str) -> bool:
         """
         Mark a movie as watched.
@@ -181,7 +183,6 @@ class User:
             return True
         return False
 
-
     def is_watched(self, film_code: str) -> bool:
         """
         Check if a movie has been watched.
@@ -203,6 +204,7 @@ class User:
         """
         return self.watched
     
+    # Liked Genres Methods
     def add_to_liked_genre(self, genre: str) -> bool:
         """
         Add a genre to the liked genres list.
@@ -215,7 +217,6 @@ class User:
         """
         if genre not in self.liked_genres:
             self.liked_genres.append(genre)
-            self.likedGenre = self.liked_genres
             return True
         return False
     
@@ -231,7 +232,6 @@ class User:
         """
         if genre in self.liked_genres:
             self.liked_genres.remove(genre)
-            self.likedGenre = self.liked_genres
             return True
         return False
     
@@ -266,10 +266,11 @@ class User:
         return {
             "user_id": self.user_id,
             "username": self.username,
+            "email": self.email,
             "favorites": self.favorites,
             "watchlist": self.watchlist,
             "watched": self.watched,
-            "likedGenres": self.liked_genres
+            "liked_genres": self.liked_genres
         }
     
     @classmethod
@@ -285,13 +286,13 @@ class User:
         """
         user = cls(
             username=data["username"],
+            email=data.get("email", ""),
             user_id=data.get("user_id")
         )
         user.favorites = data.get("favorites", [])
         user.watchlist = data.get("watchlist", [])
         user.watched = data.get("watched", [])
-        user.liked_genres = data.get("likedGenres", [])
-        user.likedGenre = user.liked_genres
+        user.liked_genres = data.get("liked_genres", [])
         return user
     
     def __repr__(self):
@@ -461,20 +462,3 @@ class UserManager:
             list[User]: List of all users
         """
         return list(self.users.values())
-    
-    def get_or_create_default_user(self) -> User:
-        """
-        Get or create a default user.
-        Useful for quickly starting the application.
-        
-        Returns:
-            User: Default user
-        """
-        if self.current_user:
-            return self.current_user
-        
-        if self.users:
-            self.current_user = list(self.users.values())[0]
-            return self.current_user
-        
-        return self.create_user("User", "user@netflux.com")

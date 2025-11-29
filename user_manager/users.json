@@ -1,25 +1,26 @@
 {
   "users": [
     {
-      "user_id": 1764150639486,
+      "user_id": 1764425285507,
       "username": "Alan",
-      "favorites": [
-        "evasion",
-        "les_reves_d_anna"
-      ],
-      "watchlist": [
-        "pirates_des_caraibes",
-        "les_reves_d_anna",
-        "evasion"
-      ],
-      "watched": [
-        "hyperloop",
-        "pirates_des_caraibes"
-      ],
-      "likedGenres": [
-        "Musical"
+      "email": "",
+      "favorites": [],
+      "watchlist": [],
+      "watched": [],
+      "liked_genres": []
+    },
+    {
+      "user_id": 1764425492367,
+      "username": "pierre",
+      "email": "",
+      "favorites": [],
+      "watchlist": [],
+      "watched": [],
+      "liked_genres": [
+        "Musical",
+        "Science-Fiction"
       ]
     }
   ],
-  "current_user_id": 1764150639486
+  "current_user_id": 1764425492367
 }

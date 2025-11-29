@@ -7,7 +7,6 @@ from PyQt6.QtGui import QPixmap, QFontMetrics
 from PyQt6.QtCore import Qt, pyqtSignal
 import os
 
-
 class FilmCard(QFrame):
     """
     Widget representing an interactive movie card.
@@ -229,7 +228,6 @@ class FilmCard(QFrame):
         if self.movie.system_name == movie_id:
             self.update_like_button_state()
 
-
 def createFilmCard(movie, user_manager=None):
     """
     Creates and returns a FilmCard instance.
@@ -242,7 +240,6 @@ def createFilmCard(movie, user_manager=None):
         FilmCard: Movie card instance
     """
     return FilmCard(movie, user_manager)
-
 
 def deleteFilmCard(card):
     """

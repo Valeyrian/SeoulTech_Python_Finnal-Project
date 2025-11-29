@@ -10,7 +10,6 @@ from PyQt6.QtGui import QFont
 
 from .user import UserManager
 
-
 class LoginDialog(QDialog):
     """
     Login/account creation dialog.
@@ -51,8 +50,6 @@ class LoginDialog(QDialog):
         self.username_input.setPlaceholderText("Enter your username")
         self.username_input.setMinimumHeight(35)
         form_layout.addRow("Username", self.username_input)
-        
-        
         main_layout.addLayout(form_layout)
         
         # Info message
@@ -129,7 +126,6 @@ def show_login_dialog(user_manager: UserManager, parent=None) :
         return dialog.logged_user
     return None
 
-
 def confirm_logout(username: str, parent=None) -> bool:
     """
     Ask for confirmation before logout.
@@ -149,9 +145,6 @@ def confirm_logout(username: str, parent=None) -> bool:
         QMessageBox.StandardButton.No
     )
     return reply == QMessageBox.StandardButton.Yes
-
-
-
 
 class GenrePreferencesDialog(QDialog):
     """
@@ -216,8 +209,7 @@ class GenrePreferencesDialog(QDialog):
             # Check if the genre is already in user preferences
             if self.user and hasattr(self.user, 'liked_genres') and genre in self.user.liked_genres:
                 checkbox.setChecked(True)
-            elif self.user and hasattr(self.user, 'likedGenre') and genre in self.user.likedGenre:
-                checkbox.setChecked(True)
+           
             
             self.checkboxes[genre] = checkbox
             genres_layout.addWidget(checkbox, row, col)
@@ -269,16 +261,12 @@ class GenrePreferencesDialog(QDialog):
         # Save in user (support both attribute names)
         if hasattr(self.user, 'liked_genres'):
             self.user.liked_genres = selected_genres
-        if hasattr(self.user, 'likedGenre'):
-            self.user.likedGenre = selected_genres
-        
-        # Save to file
+
         self.user_manager.save_users()
         
-        QMessageBox.information(self, "Success", 
-                              f"{len(selected_genres)} genre(s) saved successfully!")
+        # QMessageBox.information(self, "Success", 
+        #                       f"{len(selected_genres)} genre(s) saved successfully!")
         self.accept()
-
 
 def show_genre_preferences_dialog(user_manager: UserManager, genre_list, parent=None):
     """
