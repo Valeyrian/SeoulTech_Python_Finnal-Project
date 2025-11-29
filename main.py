@@ -62,7 +62,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.searchButton.clicked.connect(self.on_search_clicked)
         self.searchBar.returnPressed.connect(self.on_search_clicked)
         self.acceuilButton.clicked.connect(self.on_home_clicked)
-        self.recomandationButton.clicked.connect(self.on_recomendation_clicked)
+        self.recomandationButton.clicked.connect(self.on_recommendation_clicked)
     
     # ========== UI SETUP METHODS ==========
     
@@ -228,14 +228,15 @@ class MainApp(QMainWindow, Ui_MainWindow):
     
     def _calculate_columns(self):
         """Dynamically calculates the number of columns based on available width."""
-        card_width = 300
+        # Updated for vertical poster cards (200px width + margins)
+        card_width = 220  # 200px card + 20px spacing
         min_columns = 2
-        max_columns = 5
-        default_columns = 3
+        max_columns = 7   # More columns possible with narrower cards
+        default_columns = 4
         
         available_width = self.scrollArea.width() - 40
         
-        if available_width < 400:
+        if available_width < 500:
             return default_columns
         
         columns = max(min_columns, min(max_columns, available_width // card_width))
@@ -416,7 +417,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.current_view_mode = "genre"
         self.show_movies(all_movies)
     
-    def on_recomendation_clicked(self):
+    def on_recommendation_clicked(self):
         """Handler for the Recommendation button click."""
         if not self.user_manager.current_user:
             print("Please log in to see recommendations")
