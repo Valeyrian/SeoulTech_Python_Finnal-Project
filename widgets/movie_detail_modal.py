@@ -2,7 +2,8 @@
 Movie detail modal for the Netflux application.
 Displays a large overlay with movie details, trailer, and actions.
 """
-from PyQt6.QtWidgets import (QMainWindow, QWidget, QFrame, QLabel, QVBoxLayout, QPushButton, QHBoxLayout, QTextEdit)
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QFrame, QLabel, QVBoxLayout, 
+                              QPushButton, QHBoxLayout, QTextEdit)
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt, pyqtSignal, QUrl
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
@@ -16,10 +17,13 @@ class MovieDetailModal(QMainWindow):
     Netflix-style window with trailer playback and actions.
     """
     
-    # Signals
+    # ========== SIGNALS ========= =
+    
     watchlist_changed = pyqtSignal(str, bool)  # movie_id, is_in_watchlist
     watched_changed = pyqtSignal(str, bool)    # movie_id, is_watched
     like_changed = pyqtSignal(str, bool)       # movie_id, is_liked
+    
+    # ========== INITIALIZATION =========
     
     def __init__(self, movie, user_manager=None, parent=None):
         """
@@ -34,65 +38,62 @@ class MovieDetailModal(QMainWindow):
         self.movie = movie
         self.user_manager = user_manager
         
-        # Configure the window
+        # Configure window
         self.setWindowTitle(f"Netflux - {movie.title}")
+        self._configure_window_size(parent)
+        self.setMinimumSize(900, 700)
+        self.setMaximumSize(900, 700)
         
-        # Set size proportional to parent window (80%)
+        # Setup audio and media player
+        self._setup_media_player()
+        
+        # Setup UI and signals
+        self.setup_ui()
+        self.connect_signals()
+    
+    def _configure_window_size(self, parent):
+        """Configure window size and position."""
         if parent:
             parent_size = parent.size()
             window_width = 900
             window_height = int(parent_size.height() * 0.8)
             self.resize(window_width, window_height)
             
-            # Center the window on parent
+            # Center on parent
             parent_geometry = parent.frameGeometry()
             center_point = parent_geometry.center()
             self.move(center_point.x() - self.width() // 2, 
                      center_point.y() - self.height() // 2)
         else:
-            # Default size if no parent
             self.resize(900, 800)
-        
-        # Set minimum size to prevent too small window
-        self.setMinimumSize(900, 700)
-        
-        # Audio output for sound
+    
+    def _setup_media_player(self):
+        """Setup audio output and media player."""
         self.audio_output = QAudioOutput()
-        self.audio_output.setVolume(0.5)  # Set volume to 50%
+        self.audio_output.setVolume(0.5)
         
-        # Media player for trailer
         self.media_player = QMediaPlayer()
         self.media_player.setAudioOutput(self.audio_output)
-        
-        # Configure looping: restart video when it ends
         self.media_player.mediaStatusChanged.connect(self.on_media_status_changed)
-        
-        # Setup UI
-        self.setup_ui()
-        self.connect_signals()
+    
+    # ========== UI SETUP METHODS =========
     
     def setup_ui(self):
         """Configure the window interface."""
-        # Central widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # Main layout
         main_layout = QVBoxLayout(central_widget)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         
-        # Content frame
         self.content_frame = QFrame()
         self.content_frame.setObjectName("movieDetailModal")
         content_layout = QVBoxLayout(self.content_frame)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         
-        # Video player section
         self.create_video_section(content_layout)
-        
-        # Information section
         self.create_info_section(content_layout)
         
         main_layout.addWidget(self.content_frame)
@@ -101,16 +102,19 @@ class MovieDetailModal(QMainWindow):
         """Create the video player section."""
         video_container = QFrame()
         video_container.setObjectName("videoContainer")
-        # Make video height proportional (55% of window height) 
+        
         video_height = max(400, int(self.height() * 0.55))
         video_container.setFixedHeight(video_height)
         
         video_layout = QVBoxLayout(video_container)
         video_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Video widget
         self.video_widget = QVideoWidget()
         self.video_widget.setFixedHeight(video_height)
+        
+        # Set aspect ratio mode to fill the container (removes black bars)
+        self.video_widget.setAspectRatioMode(Qt.AspectRatioMode.IgnoreAspectRatio)
+        
         self.media_player.setVideoOutput(self.video_widget)
         video_layout.addWidget(self.video_widget)
         
@@ -125,7 +129,27 @@ class MovieDetailModal(QMainWindow):
         info_layout.setSpacing(8)
         
         # Title and year
+        self._add_title_section(info_layout)
+        
+        # Metadata
+        self._add_metadata_section(info_layout)
+        
+        # Action buttons
+        self.create_action_buttons(info_layout)
+        
+        # Synopsis
+        self._add_synopsis_section(info_layout)
+        
+        # Credits
+        self._add_credits_section(info_layout)
+        
+        info_layout.addStretch()
+        parent_layout.addWidget(info_container)
+    
+    def _add_title_section(self, parent_layout):
+        """Add title and year section."""
         title_layout = QHBoxLayout()
+        
         title_label = QLabel(self.movie.title)
         title_label.setObjectName("modalTitle")
         title_label.setWordWrap(False)
@@ -136,58 +160,54 @@ class MovieDetailModal(QMainWindow):
         year_label.setObjectName("modalYear")
         title_layout.addWidget(year_label)
         
-        info_layout.addLayout(title_layout)
-        
-        # Metadata (duration, genres)
+        parent_layout.addLayout(title_layout)
+    
+    def _add_metadata_section(self, parent_layout):
+        """Add metadata section (duration, genres)."""
         metadata_label = QLabel(
             f"{self.movie.minutes}m • {', '.join(self.movie.genres)}"
         )
         metadata_label.setObjectName("modalMetadata")
-        info_layout.addWidget(metadata_label)
+        parent_layout.addWidget(metadata_label)
+    
+    def _add_synopsis_section(self, parent_layout):
+        """Add synopsis section."""
+        parent_layout.addSpacing(8)
         
-        # Action buttons
-        self.create_action_buttons(info_layout)
-        
-        # Add spacing before synopsis
-        info_layout.addSpacing(8)  
-        
-        # Synopsis
         synopsis_label = QLabel("Synopsis")
         synopsis_label.setObjectName("synopsisTitle")
-        info_layout.addWidget(synopsis_label)
+        parent_layout.addWidget(synopsis_label)
         
         synopsis_text = QTextEdit()
         synopsis_text.setObjectName("synopsisText")
         synopsis_text.setReadOnly(True)
-        synopsis_text.setPlainText(getattr(self.movie, 'synopsis', 'Aucun synopsis disponible.'))
-        synopsis_text.setFixedHeight(40)  
-        info_layout.addWidget(synopsis_text)
-        
-        # Director/Cast with minimal spacing
+        synopsis_text.setPlainText(
+            getattr(self.movie, 'synopsis', 'No synopsis disponible.')
+        )
+        synopsis_text.setFixedHeight(40)
+        parent_layout.addWidget(synopsis_text)
+    
+    def _add_credits_section(self, parent_layout):
+        """Add director and cast section."""
         if hasattr(self.movie, 'director') and self.movie.director:
-            info_layout.addSpacing(2)  
-            director_label = QLabel(f"<b>Réalisateur:</b> {self.movie.director}")
+            parent_layout.addSpacing(2)
+            director_label = QLabel(f"<b>Director: </b> {self.movie.director}")
             director_label.setObjectName("creditsLabel")
             director_label.setWordWrap(True)
-            info_layout.addWidget(director_label)
-            
+            parent_layout.addWidget(director_label)
+        
         if hasattr(self.movie, 'cast') and self.movie.cast:
-            info_layout.addSpacing(2) 
-            cast_label = QLabel(f"<b>Acteurs:</b> {self.movie.cast}")
+            parent_layout.addSpacing(2)
+            cast_label = QLabel(f"<b>Cast: </b> {self.movie.cast}")
             cast_label.setObjectName("creditsLabel")
             cast_label.setWordWrap(True)
-            info_layout.addWidget(cast_label)
-        
-        # Add stretch to push content to top
-        info_layout.addStretch()
-        
-        parent_layout.addWidget(info_container)
+            parent_layout.addWidget(cast_label)
     
     def create_action_buttons(self, parent_layout):
-        """Create action buttons (watchlist, watched, like)."""
+        """Create action buttons (like, watchlist, watched)."""
         buttons_layout = QHBoxLayout()
         buttons_layout.setSpacing(12)
-       
+        
         # Like button
         self.like_button = QPushButton()
         self.like_button.setObjectName("likeButtonLarge")
@@ -195,14 +215,14 @@ class MovieDetailModal(QMainWindow):
         self.update_like_button()
         buttons_layout.addWidget(self.like_button)
         
-        # Add to watchlist button
+        # Watchlist button
         self.watchlist_button = QPushButton()
         self.watchlist_button.setObjectName("watchlistButton")
         self.watchlist_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.update_watchlist_button()
         buttons_layout.addWidget(self.watchlist_button)
         
-        # Mark as watched button
+        # Watched button
         self.watched_button = QPushButton()
         self.watched_button.setObjectName("watchedButton")
         self.watched_button.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -218,37 +238,35 @@ class MovieDetailModal(QMainWindow):
         self.watchlist_button.clicked.connect(self.on_watchlist_clicked)
         self.watched_button.clicked.connect(self.on_watched_clicked)
     
+    # ========== BUTTON UPDATE METHODS =========
+    
     def update_like_button(self):
         """Update like button state."""
         if self.user_manager and self.user_manager.current_user:
             is_liked = self.user_manager.current_user.is_favorite(self.movie.system_name)
             self.like_button.setText("♥ Liked" if is_liked else "♡ Like")
             self.like_button.setProperty("liked", is_liked)
-            # Force style refresh
-            self.like_button.style().unpolish(self.like_button)
-            self.like_button.style().polish(self.like_button)
         else:
             self.like_button.setText("♡ Like")
             self.like_button.setProperty("liked", False)
-            # Force style refresh
-            self.like_button.style().unpolish(self.like_button)
-            self.like_button.style().polish(self.like_button)
+        
+        self._refresh_button_style(self.like_button)
     
     def update_watchlist_button(self):
         """Update watchlist button state."""
         if self.user_manager and self.user_manager.current_user:
-            is_in_watchlist = self.user_manager.current_user.is_in_watchlist(self.movie.system_name)
-            self.watchlist_button.setText("✓ In my WatchList" if is_in_watchlist else "➕ WatchList")
+            is_in_watchlist = self.user_manager.current_user.is_in_watchlist(
+                self.movie.system_name
+            )
+            self.watchlist_button.setText(
+                "✓ In my WatchList" if is_in_watchlist else "➕ WatchList"
+            )
             self.watchlist_button.setProperty("in_watchlist", is_in_watchlist)
-            # Force style refresh
-            self.watchlist_button.style().unpolish(self.watchlist_button)
-            self.watchlist_button.style().polish(self.watchlist_button)
         else:
             self.watchlist_button.setText("➕ WatchList")
             self.watchlist_button.setProperty("in_watchlist", False)
-            # Force style refresh
-            self.watchlist_button.style().unpolish(self.watchlist_button)
-            self.watchlist_button.style().polish(self.watchlist_button)
+        
+        self._refresh_button_style(self.watchlist_button)
     
     def update_watched_button(self):
         """Update watched button state."""
@@ -256,15 +274,18 @@ class MovieDetailModal(QMainWindow):
             is_watched = self.user_manager.current_user.is_watched(self.movie.system_name)
             self.watched_button.setText("✓ Seen" if is_watched else "Mark as seen")
             self.watched_button.setProperty("watched", is_watched)
-            # Force style refresh
-            self.watched_button.style().unpolish(self.watched_button)
-            self.watched_button.style().polish(self.watched_button)
         else:
             self.watched_button.setText("Mark as seen")
             self.watched_button.setProperty("watched", False)
-            # Force style refresh
-            self.watched_button.style().unpolish(self.watched_button)
-            self.watched_button.style().polish(self.watched_button)
+        
+        self._refresh_button_style(self.watched_button)
+    
+    def _refresh_button_style(self, button):
+        """Force button style refresh."""
+        button.style().unpolish(button)
+        button.style().polish(button)
+    
+    # ========== EVENT HANDLERS =========
     
     def on_like_clicked(self):
         """Handle like button click."""
@@ -310,54 +331,69 @@ class MovieDetailModal(QMainWindow):
         
         user = self.user_manager.current_user
         is_watched = not user.is_watched(self.movie.system_name)
-        
-        # Track if watchlist state changed
         was_in_watchlist = user.is_in_watchlist(self.movie.system_name)
         
         if is_watched:
-            # Mark as watched
             user.mark_as_watched(self.movie.system_name)
             
-            # If marking as watched and in watchlist, remove from watchlist
+            # Auto-remove from watchlist
             if was_in_watchlist:
                 user.remove_from_watchlist(self.movie.system_name)
                 print(f"Automatically removed '{self.movie.title}' from watchlist")
-                
-                # Force update of watchlist button
                 self.update_watchlist_button()
-                
-                # Emit watchlist changed signal
                 self.watchlist_changed.emit(self.movie.system_name, False)
         else:
-            # Unmark as watched
             user.unmark_as_watched(self.movie.system_name)
         
-        # Save changes
         self.user_manager.save_users()
-        
-        # Update watched button
         self.update_watched_button()
-        
-        # Emit watched changed signal
         self.watched_changed.emit(self.movie.system_name, is_watched)
+    
+    # ========== SYNCHRONIZATION METHODS =========
+    
+    def sync_watchlist_state(self, movie_id, is_in_watchlist):
+        """
+        Synchronize watchlist button state when changed from elsewhere.
+        
+        Args:
+            movie_id: Movie identifier
+            is_in_watchlist: New watchlist state
+        """
+        if self.movie.system_name == movie_id:
+            self.update_watchlist_button()
+    
+    def sync_watched_state(self, movie_id, is_watched):
+        """
+        Synchronize watched button state when changed from elsewhere.
+        
+        Args:
+            movie_id: Movie identifier
+            is_watched: New watched state
+        """
+        if self.movie.system_name == movie_id:
+            self.update_watched_button()
+    
+    # ========== MEDIA PLAYER METHODS =========
     
     def load_trailer(self):
         """Load and play the movie trailer with sound."""
         trailer_path = self.movie.video_path
         
-        # Check if the trailer exists, otherwise use fallback video
         if trailer_path and os.path.exists(trailer_path):
             self.media_player.setSource(QUrl.fromLocalFile(os.path.abspath(trailer_path)))
             self.media_player.play()
         else:
-            # Use fallback video for missing trailers
-            fallback_path = "./assets/video_not_found.mp4"
-            if os.path.exists(fallback_path):
-                self.media_player.setSource(QUrl.fromLocalFile(os.path.abspath(fallback_path)))
-                self.media_player.play()
-                print(f"No trailer available for {self.movie.title}, using fallback video")
-            else:
-                print("Fallback video not found. Cannot play trailer.")
+            self._load_fallback_video()
+    
+    def _load_fallback_video(self):
+        """Load fallback video when trailer is not available."""
+        fallback_path = "./assets/video_not_found.mp4"
+        if os.path.exists(fallback_path):
+            self.media_player.setSource(QUrl.fromLocalFile(os.path.abspath(fallback_path)))
+            self.media_player.play()
+            print(f"No trailer available for {self.movie.title}, using fallback video")
+        else:
+            print("Fallback video not found. Cannot play trailer.")
     
     def set_volume(self, volume):
         """
@@ -376,10 +412,11 @@ class MovieDetailModal(QMainWindow):
         """Handle media status changes to implement looping."""
         from PyQt6.QtMultimedia import QMediaPlayer
         
-        # When video reaches the end, restart it
         if status == QMediaPlayer.MediaStatus.EndOfMedia:
             self.media_player.setPosition(0)
             self.media_player.play()
+    
+    # ========== QT EVENT OVERRIDES =========
     
     def showEvent(self, event):
         """Override showEvent to start trailer playback."""
@@ -390,25 +427,3 @@ class MovieDetailModal(QMainWindow):
         """Override closeEvent to stop media playback."""
         self.media_player.stop()
         super().closeEvent(event)
-    
-    def sync_watchlist_state(self, movie_id, is_in_watchlist):
-        """
-        Synchronize watchlist button state when changed from elsewhere.
-        
-        Args:
-            movie_id: Movie identifier
-            is_in_watchlist: New watchlist state
-        """
-        if self.movie.system_name == movie_id:
-            self.update_watchlist_button()
-
-    def sync_watched_state(self, movie_id, is_watched):
-        """
-        Synchronize watched button state when changed from elsewhere.
-        
-        Args:
-            movie_id: Movie identifier
-            is_watched: New watched state
-        """
-        if self.movie.system_name == movie_id:
-            self.update_watched_button()

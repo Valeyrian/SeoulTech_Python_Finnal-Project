@@ -10,7 +10,7 @@ import os
 class FilmCard(QFrame):
     """
     Widget representing an interactive movie card.
-    Netflix style: horizontal rectangular format with like and play buttons.
+    Cinema poster style: vertical format (2:3 ratio) like movie posters.
     """
     
     # Signal emitted when the like status changes (movie_id, is_liked)
@@ -31,9 +31,10 @@ class FilmCard(QFrame):
         self.movie = movie
         self.user_manager = user_manager
         
-        # Widget configuration
-        self.setMinimumSize(280, 160)
-        self.setMaximumSize(280, 160)
+        # Widget configuration - Cinema poster format (2:3 ratio)
+        # Width: 200px, Height: 300px (poster) + 95px (info) = 395px total
+        self.setMinimumSize(200, 395)
+        self.setMaximumSize(200, 395)
         self.setObjectName("movieCard")
         self.setProperty("class", "movie-card")
         
@@ -50,18 +51,19 @@ class FilmCard(QFrame):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # Container for the image
+        # Container for the image (poster)
         self.create_image_container(main_layout)
         
         # Container for the info at bottom
         self.create_info_container(main_layout)
     
     def create_image_container(self, parent_layout):
-        """Create the container for the movie image."""
+        """Create the container for the movie image (poster format)."""
         image_container = QFrame()
         image_container.setObjectName("imageContainer")
-        image_container.setMinimumSize(280, 105)
-        image_container.setMaximumSize(280, 105)
+        # Poster format: 200x300 (2:3 ratio)
+        image_container.setMinimumSize(200, 300)
+        image_container.setMaximumSize(200, 300)
         
         image_layout = QVBoxLayout(image_container)
         image_layout.setContentsMargins(0, 0, 0, 0)
@@ -75,7 +77,7 @@ class FilmCard(QFrame):
 
         image_label = QLabel()
         image_label.setPixmap(
-            pixmap.scaled(280, 105, 
+            pixmap.scaled(200, 300, 
                          Qt.AspectRatioMode.KeepAspectRatioByExpanding, 
                          Qt.TransformationMode.SmoothTransformation)
         )
@@ -89,41 +91,38 @@ class FilmCard(QFrame):
         """Create the container for information and buttons."""
         info_container = QFrame()
         info_container.setObjectName("infoContainer")
-        info_container.setMinimumHeight(55)
-        info_container.setMaximumHeight(55)
+        info_container.setMinimumHeight(95)  # Increased from 80
+        info_container.setMaximumHeight(95)
         
-        main_info_layout = QHBoxLayout(info_container)
-        main_info_layout.setContentsMargins(8, 6, 8, 8)
-        main_info_layout.setSpacing(8)
+        main_info_layout = QVBoxLayout(info_container)
+        main_info_layout.setContentsMargins(10, 8, 10, 8)  # More padding
+        main_info_layout.setSpacing(6)
         
         # Text section (title + genre/duration)
         self.create_text_section(main_info_layout)
         
-        main_info_layout.addStretch()
+        # Add small spacing before buttons
+        main_info_layout.addSpacing(4)
         
-        # Buttons (like + play)
+        # Buttons (like + play) at bottom
         self.create_action_buttons(main_info_layout)
         
         parent_layout.addWidget(info_container)
     
     def create_text_section(self, parent_layout):
         """Create the text section (title and metadata)."""
-        text_layout = QVBoxLayout()
-        text_layout.setContentsMargins(0, 0, 0, 0)
-        text_layout.setSpacing(4)
-
         # Title with ellipsis
         title_label = QLabel(self.movie.title)
-        title_label.setWordWrap(False)
-        title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        title_label.setWordWrap(True)
+        title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         title_label.setObjectName("movieTitle")
-        title_label.setMaximumHeight(18)
+        title_label.setMaximumHeight(38)  # Allow 2 lines with proper height
         
-        # Apply ellipsis
+        # Apply ellipsis for very long titles
         metrics = QFontMetrics(title_label.font())
-        elided_text = metrics.elidedText(self.movie.title, Qt.TextElideMode.ElideRight, 220)
+        elided_text = metrics.elidedText(self.movie.title, Qt.TextElideMode.ElideRight, 360)  # 2 lines worth
         title_label.setText(elided_text)
-        text_layout.addWidget(title_label)
+        parent_layout.addWidget(title_label)
 
         # Genre and duration
         genre_text = ', '.join(self.movie.genres[:2])
@@ -133,12 +132,15 @@ class FilmCard(QFrame):
         genre_duration_label = QLabel(f"{genre_text} • {self.movie.minutes}m")
         genre_duration_label.setObjectName("genreDurationLabel")
         genre_duration_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        text_layout.addWidget(genre_duration_label)
-        
-        parent_layout.addLayout(text_layout)
+        genre_duration_label.setWordWrap(False)
+        parent_layout.addWidget(genre_duration_label)
     
     def create_action_buttons(self, parent_layout):
-        """Create the action buttons (like and play)."""
+        """Create the action buttons (like and play) horizontally."""
+        buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(8)
+        
         # Like button (heart)
         self.like_button = QPushButton("♡")
         self.like_button.setObjectName("likeButton")
@@ -150,7 +152,7 @@ class FilmCard(QFrame):
         # Update the like button state
         self.update_like_button_state()
         
-        parent_layout.addWidget(self.like_button, alignment=Qt.AlignmentFlag.AlignVCenter)
+        buttons_layout.addWidget(self.like_button)
 
         # Play button
         self.play_button = QPushButton("➕")
@@ -159,7 +161,10 @@ class FilmCard(QFrame):
         self.play_button.setMinimumSize(28, 28)
         self.play_button.setMaximumSize(32, 28)
         
-        parent_layout.addWidget(self.play_button, alignment=Qt.AlignmentFlag.AlignVCenter)
+        buttons_layout.addWidget(self.play_button)
+        buttons_layout.addStretch()
+        
+        parent_layout.addLayout(buttons_layout)
     
     def connect_signals(self):
         """Connect button signals."""

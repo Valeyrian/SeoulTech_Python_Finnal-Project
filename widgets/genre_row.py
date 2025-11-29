@@ -48,32 +48,33 @@ class GenreRow(QWidget):
     
     def setup_ui(self):
         """Configure the genre row interface."""
-        # Main vertical layout
+        # Main vertical layout with more spacing
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(16, 8, 16, 4)  # Reduced vertical margins
-        main_layout.setSpacing(8)  # Reduced spacing between title and cards
+        main_layout.setContentsMargins(20, 12, 20, 12)  # Increased margins
+        main_layout.setSpacing(12)  # More space between title and cards
         
         # Header with genre name
         genre_label = QLabel(self.genre_name)
         genre_label.setObjectName("genreHeader")
         main_layout.addWidget(genre_label)
         
-        # Scroll area for movie cards
+        # Scroll area for movie cards (updated for vertical poster format)
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setObjectName("genreScrollArea")
-        scroll_area.setMinimumHeight(180)  # Adjusted height for movie cards (160px + margins)
-        scroll_area.setMaximumHeight(180)
+        # Increased height to accommodate scrollbar (380px cards + 20px scrollbar + margins)
+        scroll_area.setMinimumHeight(425)
+        scroll_area.setMaximumHeight(425)
         
         # Container widget for cards
         cards_container = QWidget()
         cards_container.setObjectName("cardsContainer")
         cards_layout = QHBoxLayout(cards_container)
-        cards_layout.setContentsMargins(0, 0, 0, 0)
-        cards_layout.setSpacing(12)
+        cards_layout.setContentsMargins(8, 0, 8, 0)  # Small horizontal padding
+        cards_layout.setSpacing(16)  # More spacing between cards
         cards_layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
         # Shuffle movies for variety in display order
@@ -93,6 +94,6 @@ class GenreRow(QWidget):
         scroll_area.setWidget(cards_container)
         main_layout.addWidget(scroll_area)
         
-        # Widget style and size
+        # Widget style and size (updated for taller cards + scrollbar)
         self.setObjectName("genreRow")
-        self.setMinimumHeight(220)  # Total height: header + scroll area + margins
+        self.setMinimumHeight(485)  # Increased total height for scrollbar space
