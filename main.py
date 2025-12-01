@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMenu
 from PyQt6.QtCore import QTimer
-from PyQt6.QtGui import QPixmap, QAction
+from PyQt6.QtGui import QPixmap, QAction, QIcon
 
 from ui import Ui_MainWindow
 from controllers import MovieController
@@ -30,6 +30,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.setupUi(self)  
         self.setWindowTitle("Netflux")
         self.setMinimumSize(1024, 768)
+
+        #set window icon
+        icon = QIcon("./assets/logo_icon.png")
+        self.setWindowIcon(icon)
         
         # Load logo
         if not os.path.exists("./assets/logo.png"):
@@ -297,10 +301,11 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.displayed_cards = valid_cards
         
         # Reload views if necessary
-        if self.current_view == "favorites" and not is_liked:
+        if self.current_view == "favorites":
             QTimer.singleShot(200, self._reload_favorites_view)
         elif self.current_view == "recommendation":
             QTimer.singleShot(200, self._reload_recomandation_vue)
+        
     
     def _on_watchlist_changed(self, movie_id, is_in_watchlist):
         """
@@ -317,7 +322,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
             self.detail_window.update_watchlist_button()
         
         # Reload watchlist view if active
-        if self.current_view == "watchlist" and not is_in_watchlist:
+        if self.current_view == "watchlist":
             print("Reloading watchlist view...")
             user = self.user_manager.current_user
             if user:

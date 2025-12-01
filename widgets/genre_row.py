@@ -66,8 +66,8 @@ class GenreRow(QWidget):
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setObjectName("genreScrollArea")
         # Increased height to accommodate scrollbar (380px cards + 20px scrollbar + margins)
-        scroll_area.setMinimumHeight(425)
-        scroll_area.setMaximumHeight(425)
+        scroll_area.setMinimumHeight(435)
+        scroll_area.setMaximumHeight(435)
         
         # Container widget for cards
         cards_container = QWidget()
