@@ -130,6 +130,7 @@ class MainApp(QMainWindow, Ui_MainWindow):
         if movie_list is None:
             movie_list = self.controller.get_all_movies()
         
+        
         self._clear_layout(self.gridLayout)
         
         if self.current_view_mode == "genre":
@@ -146,6 +147,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
         layout = self.gridLayout
         self.displayed_cards = []
         max_col = self._calculate_columns()
+        
+        # CRITICAL FIX: Reset all column stretches from previous grid mode
+        for col in range(10):  # Reset up to 10 columns (more than max)
+            layout.setColumnStretch(col, 0)
         
         row = 0
         for genre, movies in grouped_movies.items():
@@ -176,6 +181,13 @@ class MainApp(QMainWindow, Ui_MainWindow):
         max_col = self._calculate_columns()
         num_movies = len(movie_list)
         
+        # CRITICAL FIX: Reset all column stretches before grid display
+        for col in range(10):  # Reset up to 10 columns
+            layout.setColumnStretch(col, 0)
+        
+        if num_movies == 0:
+            return  # Nothing to display
+        
         if num_movies < max_col:
             # Center a single row
             start_col = (max_col - num_movies) // 2
@@ -201,11 +213,8 @@ class MainApp(QMainWindow, Ui_MainWindow):
                 if col >= max_col:
                     col = 0
                     row += 1
-            
-            # Center last incomplete row if needed
-            last_row_items = num_movies % max_col
-            if last_row_items > 0 and last_row_items < max_col // 2:
-                layout.setColumnStretch(max_col, 1)
+        
+        # Don't use setColumnStretch - let natural layout handle spacing
         
         try:
             self.scrollAreaWidgetContents.adjustSize()
@@ -442,8 +451,10 @@ class MainApp(QMainWindow, Ui_MainWindow):
         query = self.searchBar.text().strip()
         results = self.controller.search_movies(query)
         
+        
         self.current_view = "search"
         self.current_view_mode = "grid"
+        
         self.show_movies(results)
     
     # ========== EVENT HANDLERS - Account Menu ==========
@@ -512,36 +523,51 @@ class MainApp(QMainWindow, Ui_MainWindow):
         """Event handler for window resize."""
         super().resizeEvent(event)
         
-        if not hasattr(self, "controller") or self.gridLayout.count() == 0:
+        # Prevent resize loops during initial setup
+        if not hasattr(self, "controller"):
             return
         
-        # Get current search query
-        current_query = ""
-        try:
-            current_query = self.searchBar.text().strip()
-        except Exception:
-            current_query = ""
+        # Only recalculate columns if in grid mode (genre rows handle their own sizing)
+        if self.current_view_mode != "grid":
+            return
         
-        # Get the current list of movies to display
-        if current_query:
-            movie_list = self.controller.search_movies(current_query)
-        else:
-            if getattr(self, "current_view", "") == "favorites":
+        # Check if layout is empty
+        if self.gridLayout.count() == 0:
+            return
+        
+        # Calculate new column count
+        new_columns = self._calculate_columns()
+        
+        # Only redraw if column count actually changed
+        if not hasattr(self, '_last_column_count') or self._last_column_count != new_columns:
+            self._last_column_count = new_columns
+            print(f"DEBUG resizeEvent: Redrawing with {new_columns} columns")
+            
+            # Determine movie list based on current view state
+            movie_list = []
+            
+            if self.current_view == "search":
+                try:
+                    query = self.searchBar.text().strip()
+                    movie_list = self.controller.search_movies(query)
+                except Exception:
+                    movie_list = []
+            elif self.current_view == "favorites":
                 user = getattr(self.user_manager, "current_user", None)
                 movie_list = self.controller.get_favorite_movies(user) if user else []
-            elif getattr(self, "current_view", "") == "recommendation":
+            elif self.current_view == "recommendation":
                 user = getattr(self.user_manager, "current_user", None)
                 movie_list = self.controller.get_recommended_movies(user) if user else []
-            elif getattr(self, "current_view", "") == "watchlist":
+            elif self.current_view == "watchlist":
                 user = getattr(self.user_manager, "current_user", None)
                 movie_list = self.controller.get_wathclist_movie(user) if user else []
-            else:
+            else:  # home view
                 movie_list = self.controller.get_all_movies()
-        
-        try:
-            self.show_movies(movie_list)
-        except Exception:
-            pass
+            
+            try:
+                self.show_movies(movie_list)
+            except Exception as e:
+                print(f"Error during resize event handling: {e}")
 
 # ========== APPLICATION ENTRY POINT ==========
 

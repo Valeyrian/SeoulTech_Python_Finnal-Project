@@ -1,7 +1,7 @@
 """
 Widget for displaying a row of movies by genre with horizontal scrolling.
 """
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QFrame
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea, QFrame, QSizePolicy
 from PyQt6.QtCore import Qt
 import random
 
@@ -69,6 +69,9 @@ class GenreRow(QWidget):
         scroll_area.setMinimumHeight(435)
         scroll_area.setMaximumHeight(435)
         
+        # Force scroll area to expand horizontally
+        scroll_area.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        
         # Container widget for cards
         cards_container = QWidget()
         cards_container.setObjectName("cardsContainer")
@@ -97,3 +100,6 @@ class GenreRow(QWidget):
         # Widget style and size (updated for taller cards + scrollbar)
         self.setObjectName("genreRow")
         self.setMinimumHeight(485)  # Increased total height for scrollbar space
+        
+        # Force GenreRow to expand horizontally to fill parent
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
