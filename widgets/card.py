@@ -32,9 +32,9 @@ class FilmCard(QFrame):
         self.user_manager = user_manager
         
         # Widget configuration - Cinema poster format (2:3 ratio)
-        # Width: 200px, Height: 300px (poster) + 95px (info) = 395px total
-        self.setMinimumSize(200, 395)
-        self.setMaximumSize(200, 395)
+        # Width: 200px, Height: 300px (poster) + 1000px (info) = 400 total
+        self.setMinimumSize(200, 400)
+        self.setMaximumSize(200, 400)
         self.setObjectName("movieCard")
         self.setProperty("class", "movie-card")
         
@@ -91,11 +91,11 @@ class FilmCard(QFrame):
         """Create the container for information and buttons."""
         info_container = QFrame()
         info_container.setObjectName("infoContainer")
-        info_container.setMinimumHeight(95)  # Increased from 80
-        info_container.setMaximumHeight(95)
+        info_container.setMinimumHeight(100)
+        info_container.setMaximumHeight(100)
         
         main_info_layout = QVBoxLayout(info_container)
-        main_info_layout.setContentsMargins(10, 8, 10, 8)  # More padding
+        main_info_layout.setContentsMargins(10, 8, 10, 8)
         main_info_layout.setSpacing(6)
         
         # Text section (title + genre/duration)
@@ -111,17 +111,22 @@ class FilmCard(QFrame):
     
     def create_text_section(self, parent_layout):
         """Create the text section (title and metadata)."""
-        # Title with ellipsis
-        title_label = QLabel(self.movie.title)
-        title_label.setWordWrap(True)
-        title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        # Title on single line with ellipsis if too long
+        title_label = QLabel()
+        title_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         title_label.setObjectName("movieTitle")
-        title_label.setMaximumHeight(38)  # Allow 2 lines with proper height
+        title_label.setMaximumWidth(180)
+        title_label.setWordWrap(False)  # Single line only
         
-        # Apply ellipsis for very long titles
-        metrics = QFontMetrics(title_label.font())
-        elided_text = metrics.elidedText(self.movie.title, Qt.TextElideMode.ElideRight, 360)  # 2 lines worth
-        title_label.setText(elided_text)
+        # Use elided text for automatic ellipsis
+        font_metrics = QFontMetrics(title_label.font())
+        elided_title = font_metrics.elidedText(
+            self.movie.title, 
+            Qt.TextElideMode.ElideRight, 
+            180
+        )
+        title_label.setText(elided_title)
+        
         parent_layout.addWidget(title_label)
 
         # Genre and duration
@@ -133,6 +138,7 @@ class FilmCard(QFrame):
         genre_duration_label.setObjectName("genreDurationLabel")
         genre_duration_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         genre_duration_label.setWordWrap(False)
+        genre_duration_label.setMaximumWidth(180)
         parent_layout.addWidget(genre_duration_label)
     
     def create_action_buttons(self, parent_layout):

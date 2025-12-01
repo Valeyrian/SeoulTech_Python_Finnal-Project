@@ -4,7 +4,7 @@ Displays a large overlay with movie details, trailer, and actions.
 """
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QFrame, QLabel, QVBoxLayout, 
                               QPushButton, QHBoxLayout, QTextEdit)
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import Qt, pyqtSignal, QUrl
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
@@ -43,6 +43,9 @@ class MovieDetailModal(QMainWindow):
         self._configure_window_size(parent)
         self.setMinimumSize(900, 700)
         self.setMaximumSize(900, 700)
+
+        icon = QIcon("./assets/logo_icon.png")
+        self.setWindowIcon(icon)
         
         # Setup audio and media player
         self._setup_media_player()
@@ -76,6 +79,8 @@ class MovieDetailModal(QMainWindow):
         self.media_player.setAudioOutput(self.audio_output)
         self.media_player.mediaStatusChanged.connect(self.on_media_status_changed)
     
+   
+
     # ========== UI SETUP METHODS =========
     
     def setup_ui(self):
