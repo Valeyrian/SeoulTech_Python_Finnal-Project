@@ -20,7 +20,27 @@
         "Musical",
         "Science-Fiction"
       ]
+    },
+    {
+      "user_id": 1764504507687,
+      "username": "alan",
+      "email": "",
+      "favorites": [
+        "pirates_des_caraibes",
+        "doctor_strange"
+      ],
+      "watchlist": [
+        "wonder_woman"
+      ],
+      "watched": [
+        "pirates_des_caraibes"
+      ],
+      "liked_genres": [
+        "Crime",
+        "Drama",
+        "Musical"
+      ]
     }
   ],
-  "current_user_id": null
+  "current_user_id": 1764504507687
 }
