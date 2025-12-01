@@ -27,7 +27,10 @@
       "email": "",
       "favorites": [
         "pirates_des_caraibes",
-        "doctor_strange"
+        "django_unchained",
+        "star_wars",
+        "mad_max_fury_road",
+        "princess_mononoke"
       ],
       "watchlist": [
         "wonder_woman"
@@ -36,9 +39,7 @@
         "pirates_des_caraibes"
       ],
       "liked_genres": [
-        "Crime",
-        "Drama",
-        "Musical"
+        "Western"
       ]
     }
   ],
