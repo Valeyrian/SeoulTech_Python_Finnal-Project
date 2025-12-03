@@ -81,22 +81,6 @@ class Catalog:
         for movie in self.movies:
             print(movie)
     
-    def get_movies_by_genre(self, genre):
-        """
-        Get all movies of a given genre.
-        
-        Args:
-            genre (str): Genre to search for
-            
-        Returns:
-            list[Movie]: List of matching movies
-        """
-        results = []
-        for movie in self.movies:
-            if genre in movie.genres:
-                results.append(movie)
-        return results
-    
     def get_movies_from_multiple_genres(self, genres_list):
         """
         Get movies belonging to at least one of the genres in the list.
@@ -185,18 +169,6 @@ class Catalog:
         """
         return len(self.movies)
     
-    def __len__(self):
-        """Allow using len(catalog)."""
-        return len(self.movies)
-    
-    def __iter__(self):
-        """Allow iterating over movies: for movie in catalog."""
-        return iter(self.movies)
-    
-    def __repr__(self):
-        """Text representation of the catalog."""
-        return f"<Catalog path='{self.path}' movies={len(self.movies)}>"
-
     def get_movies_by_title_or_director(self, keywords):
         """
         Search for movies by keywords in the title or director.
@@ -222,3 +194,33 @@ class Catalog:
                 results.append(movie)
 
         return results
+    
+    def __len__(self):
+        """Allow using len(catalog)."""
+        return len(self.movies)
+    
+    def __iter__(self):
+        """Allow iterating over movies: for movie in catalog."""
+        return iter(self.movies)
+    
+    def __repr__(self):
+        """Text representation of the catalog."""
+        return f"<Catalog path='{self.path}' movies={len(self.movies)}>"
+
+
+
+    # def get_movies_by_genre(self, genre):
+#     """
+#     Get all movies of a given genre.
+        
+#     Args:
+#         genre (str): Genre to search for
+            
+#     Returns:
+#         list[Movie]: List of matching movies
+#     """
+#     results = []
+#     for movie in self.movies:
+#         if genre in movie.genres:
+#             results.append(movie)
+#     return results

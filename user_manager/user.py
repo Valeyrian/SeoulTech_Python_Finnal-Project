@@ -310,7 +310,7 @@ class UserManager:
         current_user (User): Currently logged-in user
     """
     
-    def __init__(self, data_file: str = "user_manager/users.json"):
+    def __init__(self, data_file: str = "data/users.json"):
         """
         Initialize the user manager.
         
@@ -462,3 +462,5 @@ class UserManager:
             list[User]: List of all users
         """
         return list(self.users.values())
+
+

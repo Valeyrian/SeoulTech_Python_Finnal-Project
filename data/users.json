@@ -1,17 +1,8 @@
 {
   "users": [
     {
-      "user_id": 1764425285507,
-      "username": "Alan",
-      "email": "",
-      "favorites": [],
-      "watchlist": [],
-      "watched": [],
-      "liked_genres": []
-    },
-    {
       "user_id": 1764425492367,
-      "username": "pierre",
+      "username": "Ben",
       "email": "",
       "favorites": [],
       "watchlist": [],
@@ -23,20 +14,19 @@
     },
     {
       "user_id": 1764504507687,
-      "username": "alan",
+      "username": "Alan",
       "email": "",
       "favorites": [
-        "pirates_des_caraibes",
         "django_unchained",
         "star_wars",
         "mad_max_fury_road",
-        "princess_mononoke"
+        "le_dernier_espion"
       ],
       "watchlist": [
         "wonder_woman"
       ],
       "watched": [
-        "pirates_des_caraibes"
+        "the_godfather"
       ],
       "liked_genres": [
         "Western"

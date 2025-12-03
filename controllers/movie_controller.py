@@ -55,7 +55,7 @@ class MovieController:
         if not self._current_search:
             return self.get_all_movies()
         
-        # Use the new method that searches in both title and director
+        # Use method that searches in both title and director
         return self.catalog.get_movies_by_title_or_director(self._current_search)
     
     def get_available_genres(self):
@@ -232,3 +232,7 @@ class MovieController:
                 watched_movies.append(movie)
         
         return watched_movies
+
+
+
+

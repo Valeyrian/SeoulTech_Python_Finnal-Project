@@ -148,7 +148,6 @@ class MainApp(QMainWindow, Ui_MainWindow):
         self.displayed_cards = []
         max_col = self._calculate_columns()
         
-        # CRITICAL FIX: Reset all column stretches from previous grid mode
         for col in range(10):  # Reset up to 10 columns (more than max)
             layout.setColumnStretch(col, 0)
         

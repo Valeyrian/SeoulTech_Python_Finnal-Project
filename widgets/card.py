@@ -251,13 +251,3 @@ def createFilmCard(movie, user_manager=None):
         FilmCard: Movie card instance
     """
     return FilmCard(movie, user_manager)
-
-def deleteFilmCard(card):
-    """
-    Function to delete a card.
-    
-    Args:
-        card: FilmCard instance to delete
-    """
-    card.setParent(None)
-    card.deleteLater()
