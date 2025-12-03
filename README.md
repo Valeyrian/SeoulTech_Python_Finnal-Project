@@ -260,15 +260,15 @@ NETFLUX/
 │   └── catalog.csv          # Movie database
 ├── data/                    # Dynamic data (not versioned)
 │   ├── movies/              # Video files (.mp4)
-│   └── movies_tiles/        # Movie thumbnails (.jpg)
+│   ├── movies_tiles/        # Movie thumbnails (.jpg)
+│   └── users.json           # JSON persistence (déplacé ici)
 ├── models/                  # Data models
 │   ├── catalog.py           # CSV parsing
 │   └── movie.py             # Movie object
 ├── ui/                      # Views (Generated via Qt Designer)
 │   └── main_window.py       # Main window
 ├── user_manager/            # User management
-│   ├── user.py              # User model
-│   └── users.json           # JSON persistence
+│   └── user.py              # User model (fichier de persistance users.json retiré)
 ├── widgets/                 # Reusable UI components
 │   ├── card.py              # Interactive movie card
 │   ├── genre_row.py         # Scrollable movie row
