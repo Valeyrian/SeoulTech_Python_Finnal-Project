@@ -353,17 +353,4 @@ The interface was entirely styled via **QSS (Qt Style Sheets)** to match a stron
 
 ---
 
-## 👥 The Team
 
-Project developed by the **Netflux** team:
-
-- **[Member Name 1]** - Backend Architecture & Controllers
-- **[Member Name 2]** - Graphical Interface & QSS Design
-- **[Member Name 3]** - Data Management (CSV/JSON) & Models
-- **[Member Name 4]** - Recommendation System & Testing
-
----
-
-<div align="center">
-  <small>Made with ❤️ and ☕ for the Python Programming course - 2025</small>
-</div>
