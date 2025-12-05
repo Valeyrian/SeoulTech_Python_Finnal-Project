@@ -6,7 +6,6 @@
   
   [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
   [![PyQt6](https://img.shields.io/badge/GUI-PyQt6-green?style=for-the-badge&logo=qt&logoColor=white)](https://pypi.org/project/PyQt6/)
-  [![License](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)](LICENSE)
   [![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)]()
 
   <p align="center">
@@ -17,20 +16,20 @@
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
-1. [📖 About the Project](#-about-the-project)
-2. [✨ Key Features](#-key-features)
-3. [🏗️ Technical Architecture](#️-technical-architecture)
-4. [📂 Project Structure](#-project-structure)
-5. [💾 Data Management](#-data-management)
-6. [🚀 Installation and Setup](#-installation-and-setup)
-7. [🎨 Interface & Design](#-interface--design)
-8. [👥 The Team](#-the-team)
+1. [About the Project](#-about-the-project)
+2. [Key Features](#-key-features)
+3. [Technical Architecture](#️-technical-architecture)
+4. [Project Structure](#-project-structure)
+5. [Data Management](#-data-management)
+6. [Installation and Setup](#-installation-and-setup)
+7. [Interface & Design](#-interface--design)
+
 
 ---
 
-## 📖 About the Project
+## About the Project
 
 **Netflux** is a university project developed as part of the *Python Programming (100461-11001)* course. The main objective was to design an interactive movie recommendation system capable of filtering and suggesting content based on user preferences.
 
@@ -44,30 +43,30 @@ Beyond a simple script, we developed a **rich graphical application (GUI)** base
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 👤 Complete User Management
+### Complete User Management
 * **Authentication:** Secure login and registration system.
 * **Persistence:** Automatic saving of user data (preferences, history) in `users.json`.
 * **Profiling:** Selection of favorite genres to refine the recommendation algorithm.
 
-### 🎬 Navigation & Discovery
+### Navigation & Discovery
 * **Visual Catalog:** Display of movies grouped by categories with smooth horizontal scrolling (`GenreRow` Widget).
 * **Advanced Search:** Real-time search bar filtering by title, director, or cast via the `MovieController`.
 * **Personalized Recommendations:** Dedicated tab suggesting movies matching the user's favorite genres.
 
-### ❤️ Social Integration & Lists
+### Social Integration & Lists
 * **Favorites (Likes):** Add movies to your "Likes". State is synchronized in real-time across the entire interface.
 * **Watchlist:** Create your list of movies to watch later.
 * **History:** Mark movies as "Watched" to remove them from your queue.
 
-### 📺 Player & Details
+### Player & Details
 * **Detailed Page:** Immersive modal (`MovieDetailModal`) displaying synopsis, year, duration, cast, and director.
 * **Video Player:** Integrated playback of trailers (`.mp4`) via `QMediaPlayer`.
 
 ---
 
-## 🏗️ Technical Architecture
+## Technical Architecture
 
 The project strictly follows the **MVC (Model-View-Controller)** design pattern to ensure maintainability and separation of concerns.
 
@@ -246,7 +245,7 @@ graph LR
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 Here is the complete source code tree, organized by logical modules:
 ```
@@ -261,7 +260,7 @@ NETFLUX/
 ├── data/                    # Dynamic data (not versioned)
 │   ├── movies/              # Video files (.mp4)
 │   ├── movies_tiles/        # Movie thumbnails (.jpg)
-│   └── users.json           # JSON persistence (déplacé ici)
+│   └── users.json           # JSON persistence 
 ├── models/                  # Data models
 │   ├── catalog.py           # CSV parsing
 │   └── movie.py             # Movie object
@@ -278,13 +277,14 @@ NETFLUX/
 
 ---
 
-## 💾 Data Management
+## Data Management
 
 ### 1. The Catalog (catalog.csv)
 
 Movies are stored in a structured CSV file loaded by the `Catalog` class.
 
 **Format:** `title:year:minutes:genres:system_name:director:cast:synopsis`
+![alt text](image.png)
 
 ### 2. Users (users.json)
 
@@ -308,7 +308,7 @@ User data persistence is ensured by JSON serialization via `UserManager`.
 
 ---
 
-## 🚀 Installation and Setup
+## Installation and Setup
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -340,7 +340,7 @@ python main.py
 
 ---
 
-## 🎨 Interface & Design
+## Interface & Design
 
 The interface was entirely styled via **QSS (Qt Style Sheets)** to match a strong visual identity ("Dark Mode" & "Purple Accent"), defined in `assets/styles.qss`.
 
